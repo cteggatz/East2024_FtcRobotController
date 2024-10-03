@@ -24,7 +24,7 @@ public class BasicOpMode_Iterative extends OpMode {
      */
     @Override
     public void init() {
-        telemetry.addData("Status", "Initializing);
+        telemetry.addData("Status", "Initializing");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
@@ -32,7 +32,7 @@ public class BasicOpMode_Iterative extends OpMode {
         motorTest  = hardwareMap.get(DcMotor.class, "motorTest");
         servoTest  = hardwareMap.get(Servo.class, "servoTest");
 
-        rightDrive.setDirection(DcMotor.Direction.FORWARD);
+        motorTest.setDirection(DcMotor.Direction.FORWARD);
         servoTest.setPosition(MID_SERVO);
 
         // Tell the driver that initialization is complete.
