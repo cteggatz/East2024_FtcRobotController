@@ -11,29 +11,30 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Test: Iterative OpMode", group="Iterative OpMode")
 public class TestOpMode extends OpMode {
-    // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor motorTest = null;
-    private Servo   servoTest   = null;
+    private DcMotor motorTest = null; // Local reference to the physical motor.
+    private Servo   servoTest   = null; //Local reference to the physical motor.
 
-    double servoOffset = 0;
+    double servoOffset = 0; // Refers to the rotation of the servo.
 
     public static final double MID_SERVO   =  0.5 ;
-    public static final double SERVO_SPEED  = 0.02 ;        // sets rate to move servo
+    public static final double SERVO_SPEED  = 0.02 ;
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
+        // Tell the driver that initialization is starting.
         telemetry.addData("Status", "Initializing");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        motorTest  = hardwareMap.get(DcMotor.class, "motorTest");
-        servoTest  = hardwareMap.get(Servo.class, "servoTest");
+        motorTest = hardwareMap.get(DcMotor.class, "motorTest");
+        servoTest = hardwareMap.get(Servo.class, "servoTest");
 
+        // Initialize the motor and servo to default settings.
         motorTest.setDirection(DcMotor.Direction.FORWARD);
         servoTest.setPosition(MID_SERVO);
 
@@ -54,6 +55,7 @@ public class TestOpMode extends OpMode {
      */
     @Override
     public void start() {
+        // Set the elapsed time to 0.
         runtime.reset();
     }
 
@@ -62,19 +64,22 @@ public class TestOpMode extends OpMode {
      */
     @Override
     public void loop() {
+        // Set motor power to y-axis of left stick.
         double drive = gamepad1.left_stick_y;
-        double motorPower    = Range.clip(drive, -1.0, 1.0) ;
+        double motorPower = Range.clip(drive, -1.0, 1.0) ;
 
+        // Adjust servo rotation based on left and right bumpers.
         if (gamepad1.right_bumper)
             servoOffset += SERVO_SPEED;
         if (gamepad1.left_bumper)
             servoOffset -= SERVO_SPEED;
         servoOffset = Range.clip(servoOffset, -0.5, 0.5);
 
+        // Sends motor and servo values to the hardware.
         motorTest.setPower(motorPower);
         servoTest.setPosition(MID_SERVO + servoOffset);
 
-        // Show the elapsed game time and wheel power.
+        // Tell the driver the current status.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motor", "Power = (%.2f)", motorPower);
         telemetry.addData("Servo", "Offset = %.2f", servoOffset);
