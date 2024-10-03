@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,7 +10,7 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Basic: Iterative OpMode", group="Iterative OpMode")
 @Disabled
-public class BasicOpMode_Iterative extends OpMode {
+public class ManualOpMode extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftDrive = null;
@@ -57,7 +59,7 @@ public class BasicOpMode_Iterative extends OpMode {
      * Code to run REPEATEDLY after the driver hits START but before they hit STOP
      */
     @Override
-    public void start_loop() {
+    public void loop() {
         // Setup a variable for each drive wheel to save power level for telemetry
         double leftPower;
         double rightPower;

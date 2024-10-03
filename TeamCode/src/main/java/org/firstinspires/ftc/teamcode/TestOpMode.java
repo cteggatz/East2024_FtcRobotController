@@ -1,14 +1,16 @@
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+package org.firstinspires.ftc.teamcode;
+
+//import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
-@TeleOp(name="Basic: Iterative OpMode", group="Iterative OpMode")
-@Disabled
-public class BasicOpMode_Iterative extends OpMode {
+@TeleOp(name="Test: Iterative OpMode", group="Iterative OpMode")
+public class TestOpMode extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor motorTest = null;
@@ -59,7 +61,7 @@ public class BasicOpMode_Iterative extends OpMode {
      * Code to run REPEATEDLY after the driver hits START but before they hit STOP
      */
     @Override
-    public void start_loop() {
+    public void loop() {
         double drive = gamepad1.left_stick_y;
         double motorPower    = Range.clip(drive, -1.0, 1.0) ;
 
