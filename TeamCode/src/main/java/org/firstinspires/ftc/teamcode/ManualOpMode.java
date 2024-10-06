@@ -15,6 +15,20 @@ public class ManualOpMode extends OpMode {
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
 
+    int currentSpeedLevel = 0; // Range is [0, MOTOR_SPEED_LEVELS)
+
+    double bumperDecrementCooldown = 0.0;
+    double bumperIncrementCooldown = 0.0;
+
+    public static final double MOTOR_SPEED_MIN  = 0.2;
+    public static final double MOTOR_SPEED_MAX  = 1.0;
+    public static final int MOTOR_SPEED_LEVELS  = 5;
+
+    public static final double BUMPER_DEBOUNCE_TIME  = 10.0;
+
+    // The calculated speed difference between each speed level
+    public static final double MOTOR_SPEED_DIFF = MOTOR_SPEED_LEVELS == 1 ?  0 : (MOTOR_SPEED_MAX - MOTOR_SPEED_MIN) / (MOTOR_SPEED_LEVELS - 1);
+
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -59,32 +73,20 @@ public class ManualOpMode extends OpMode {
      */
     @Override
     public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double leftPower;
-        double rightPower;
+        double deltaTime = runtime.milliseconds();
+        runtime.reset();
 
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
+        // Change speed depending on left and right bumper presses.
+        checkBumperPress(deltaTime, gamepad1.left_bumper, gamepad1.right_bumper);
 
         // POV Mode uses left stick to go forward, and right stick to turn.
         // - This uses basic math to combine motions and is easier to drive straight.
         double drive = -gamepad1.left_stick_y;
-        double turn  =  gamepad1.right_stick_x;
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+        double turn  =  gamepad1.left_stick_x;
+        setMotorSpeed(drive + turn, drive - turn);
 
-        // Tank Mode uses one stick to control each wheel.
-        // - This requires no math, but it is hard to drive forward slowly and keep straight.
-        // leftPower  = -gamepad1.left_stick_y ;
-        // rightPower = -gamepad1.right_stick_y ;
-
-        // Send calculated power to wheels
-        leftDrive.setPower(leftPower);
-        rightDrive.setPower(rightPower);
-
-        // Show the elapsed game time and wheel power.
+        // Show the elapsed game time.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
     }
 
     /*
@@ -93,5 +95,48 @@ public class ManualOpMode extends OpMode {
     @Override
     public void stop() {
 
+    }
+
+    private void checkBumperPress(double deltaTime, boolean decrementButton, boolean incrementButton) {
+        // Decrease debounce cooldown by time passed.
+        bumperDecrementCooldown -= deltaTime;
+        if (bumperDecrementCooldown < 0.0) bumperDecrementCooldown = 0.0;
+
+        if (decrementButton) {
+            // If not on debounce cooldown, try to decrement speed level.
+            if (bumperDecrementCooldown == 0.0) {
+                currentSpeedLevel--;
+                if (currentSpeedLevel < 0) currentSpeedLevel = 0;
+            }
+
+            // Reset debounce cooldown.
+            bumperDecrementCooldown = BUMPER_DEBOUNCE_TIME;
+        }
+
+        // Decrease debounce cooldown by time passed.
+        bumperIncrementCooldown -= deltaTime;
+        if (bumperIncrementCooldown < 0.0) bumperIncrementCooldown = 0.0;
+
+        if (incrementButton) {
+            // If not on debounce cooldown, try to increment speed level.
+            if (bumperIncrementCooldown == 0.0) {
+                currentSpeedLevel++;
+                if (currentSpeedLevel > MOTOR_SPEED_LEVELS - 1) currentSpeedLevel = MOTOR_SPEED_LEVELS - 1;
+            }
+
+            // Reset debounce cooldown.
+            bumperIncrementCooldown = BUMPER_DEBOUNCE_TIME;
+        }
+    }
+
+    private void setMotorSpeed(double leftPower, double rightPower) {
+        double speedMult = MOTOR_SPEED_MIN + (currentSpeedLevel * MOTOR_SPEED_DIFF);
+        leftPower = Range.clip(leftPower, -1.0, 1.0) * speedMult;
+        rightPower = Range.clip(rightPower, -1.0, 1.0) * speedMult;
+
+        // Send calculated power to wheels and display status
+        leftDrive.setPower(leftPower);
+        rightDrive.setPower(rightPower);
+        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
     }
 }
