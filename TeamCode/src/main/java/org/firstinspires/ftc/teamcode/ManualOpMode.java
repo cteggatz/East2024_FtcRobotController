@@ -20,11 +20,11 @@ public class ManualOpMode extends OpMode {
     double bumperDecrementCooldown = 0.0;
     double bumperIncrementCooldown = 0.0;
 
-    public static final double MOTOR_SPEED_MIN  = 0.2;
+    public static final double MOTOR_SPEED_MIN  = 0.4;
     public static final double MOTOR_SPEED_MAX  = 1.0;
-    public static final int MOTOR_SPEED_LEVELS  = 5;
+    public static final int MOTOR_SPEED_LEVELS  = 3;
 
-    public static final double BUMPER_DEBOUNCE_TIME  = 10.0;
+    public static final double BUMPER_DEBOUNCE_TIME  = 10.0; // Minimum number of milliseconds between bumper presses
 
     // The calculated speed difference between each speed level
     public static final double MOTOR_SPEED_DIFF = MOTOR_SPEED_LEVELS == 1 ?  0 : (MOTOR_SPEED_MAX - MOTOR_SPEED_MIN) / (MOTOR_SPEED_LEVELS - 1);
@@ -77,12 +77,12 @@ public class ManualOpMode extends OpMode {
         runtime.reset();
 
         // Change speed depending on left and right bumper presses.
-        checkBumperPress(deltaTime, gamepad1.left_bumper, gamepad1.right_bumper);
+        handleBumperPress(deltaTime, gamepad1.left_bumper, gamepad1.right_bumper);
 
         // POV Mode uses left stick to go forward, and right stick to turn.
         // - This uses basic math to combine motions and is easier to drive straight.
         double drive = -gamepad1.left_stick_y;
-        double turn  =  gamepad1.left_stick_x;
+        double turn  =  gamepad1.right_stick_y;
         setMotorSpeed(drive + turn, drive - turn);
 
         // Show the elapsed game time.
@@ -97,12 +97,18 @@ public class ManualOpMode extends OpMode {
 
     }
 
-    private void checkBumperPress(double deltaTime, boolean decrementButton, boolean incrementButton) {
+    /**
+     * If either of the bumpers are being pressed, update currentSpeedLevel and handle button press debounce.
+     * @param deltaTime The time since the function was last called, in milliseconds.
+     * @param decrementButtonPressed Whether the button to decrement currentSpeedLevel is being pressed.
+     * @param incrementButtonPressed Whether the button to increment currentSpeedLevel is being pressed.
+     */
+    private void handleBumperPress(double deltaTime, boolean decrementButtonPressed, boolean incrementButtonPressed) {
         // Decrease debounce cooldown by time passed.
         bumperDecrementCooldown -= deltaTime;
         if (bumperDecrementCooldown < 0.0) bumperDecrementCooldown = 0.0;
 
-        if (decrementButton) {
+        if (decrementButtonPressed) {
             // If not on debounce cooldown, try to decrement speed level.
             if (bumperDecrementCooldown == 0.0) {
                 currentSpeedLevel--;
@@ -117,7 +123,7 @@ public class ManualOpMode extends OpMode {
         bumperIncrementCooldown -= deltaTime;
         if (bumperIncrementCooldown < 0.0) bumperIncrementCooldown = 0.0;
 
-        if (incrementButton) {
+        if (incrementButtonPressed) {
             // If not on debounce cooldown, try to increment speed level.
             if (bumperIncrementCooldown == 0.0) {
                 currentSpeedLevel++;
