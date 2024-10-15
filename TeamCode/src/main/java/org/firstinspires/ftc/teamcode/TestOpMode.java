@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
-@TeleOp(name="Test: Iterative OpMode", group="Iterative OpMode")
+@TeleOp(name="Test: Motor and Servo OpMode", group="Iterative OpMode")
 public class TestOpMode extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor motorTest = null; // Local reference to the physical motor.
