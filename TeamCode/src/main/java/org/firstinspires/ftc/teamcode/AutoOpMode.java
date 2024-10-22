@@ -43,11 +43,11 @@ public class AutoOpMode extends OpMode {
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
     static final double     COUNTS_PER_MOTOR_REV    = 28 ;    // REV-41-1291: HD Hex Motor No Gearbox
     static final double     DRIVE_GEAR_REDUCTION    = 20.0 ;     // REV-41-1602: 4:1 and REV-41-1603 5:1
-    static final double     WHEEL_DIAMETER_INCHES   = 90.0/25.4 ;     // 90mm diameter wheels are converted to inches for figuring circumference.
+    static final double     WHEEL_DIAMETER_INCHES   = 91.55/25.4 ;     // 90mm diameter wheels are converted to inches for figuring circumference.
     static final double     COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * Math.PI);
 
     // DRIVE and TURN proportions reflect how many inches the wheels need to rotate in order to move/turn the robot. Currently determined through trial and error.
-    static final double     DRIVE_PROPORTION = 0.93;
+    static final double     DRIVE_PROPORTION = 0.935;
     static final double     TURN_PROPORTION       = 0.1185;
 
     static final double     DRIVE_SPEED             = 1.0;
@@ -67,13 +67,16 @@ public class AutoOpMode extends OpMode {
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         rightDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Move in a square
+        //Move in a square
         for (int i = 0; i < 4; i++) {
             addMove(20);
             addTurn(90);
@@ -189,6 +192,7 @@ public class AutoOpMode extends OpMode {
      * @param speed How fast the robot will turn.
      * @param timeout The maximum amount of time the robot will try to turn for. -1 is unlimited.
      */
+
     private void addTurn(double angle, double speed, double timeout) {
         encoderRequests.add(new EncoderRequest(
                 angle*TURN_PROPORTION,
