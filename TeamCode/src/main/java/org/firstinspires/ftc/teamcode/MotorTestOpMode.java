@@ -13,17 +13,18 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name="Test: Pivot Motor", group="Iterative OpMode")
 public class MotorTestOpMode extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    double targetPosition = 0;
-    double moveChange = 0;
     //private DcMotor motorTest = null; // Local reference to the physical motor.
     private DcMotor pivotTest = null; //Local reference to the physical motor.
 
-    double servoOffset = 0; // Refers to the rotation of the servo.
+    double targetPosition = 0; // Ranges from 0 to 1;
 
-    public static final double MOVE_SPEED   =  0.5 ;
+    public static final double MOVE_SPEED = 0.001 ;
 
     public static final int COUNT_PER_REV = 28;
     public static final int GEAR_REDUCTION = 90;
+    public static final int COUNT_PER_DEGREE = COUNT_PER_REV*GEAR_REDUCTION/360;
+    public static final int MIN_DEGREE = -90;
+    public static final int MAX_DEGREE = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -43,7 +44,6 @@ public class MotorTestOpMode extends OpMode {
         //motorTest.setDirection(DcMotor.Direction.FORWARD);
         pivotTest.setDirection(DcMotor.Direction.FORWARD);
 
-        pivotTest.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         pivotTest.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pivotTest.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -52,7 +52,7 @@ public class MotorTestOpMode extends OpMode {
         telemetry.addData("Run Mode", "Run_To_Position");
 
         // setting the target position
-        this.targetPosition = pivotTest.getTargetPosition();
+        this.targetPosition = 0;
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -84,18 +84,12 @@ public class MotorTestOpMode extends OpMode {
         double deltaTime = runtime.milliseconds();
         runtime.reset();
 
-        this.moveChange = 0;
-        if(gamepad1.left_bumper){
-            this.targetPosition += -.5 * deltaTime;
-        } if (gamepad1.right_bumper) {
-            this.targetPosition += .5 * deltaTime;
-        }
+        if (gamepad1.left_bumper) targetPosition -= MOVE_SPEED * deltaTime;
+        if (gamepad1.right_bumper) targetPosition += MOVE_SPEED * deltaTime;
+        if (targetPosition < 0) targetPosition = 0;
+        if (targetPosition > 1) targetPosition = 1;
 
-
-
-
-
-        pivotTest.setTargetPosition((int)targetPosition);
+        pivotTest.setTargetPosition((int)(COUNT_PER_DEGREE * (MIN_DEGREE + targetPosition * (MAX_DEGREE - MIN_DEGREE))));
         pivotTest.setPower(1.0f);
 
         // Tell the driver the current status.
