@@ -18,7 +18,7 @@ public class MotorTestOpMode extends OpMode {
 
     double targetPosition = 0; // Ranges from 0 to 1;
 
-    public static final double MOVE_SPEED = 0.001 ;
+    public static final double MOVE_SPEED = 1.0/1000 ;
 
     public static final int COUNT_PER_REV = 28;
     public static final int GEAR_REDUCTION = 90;
@@ -43,16 +43,13 @@ public class MotorTestOpMode extends OpMode {
         // Initialize the motor and servo to default settings.
         //motorTest.setDirection(DcMotor.Direction.FORWARD);
         pivotTest.setDirection(DcMotor.Direction.FORWARD);
-
+        pivotTest.setTargetPosition(0);
         pivotTest.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pivotTest.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         pivotTest.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.addData("Run Mode", "Run_To_Position");
-
-        // setting the target position
-        this.targetPosition = 0;
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -63,7 +60,12 @@ public class MotorTestOpMode extends OpMode {
      */
     @Override
     public void init_loop() {
-
+        if (gamepad1.dpad_left && gamepad1.b) {
+            pivotTest.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            pivotTest.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            pivotTest.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            telemetry.addData("Status", "Reset Motor Encoder");
+        }
     }
 
     /*
@@ -89,7 +91,7 @@ public class MotorTestOpMode extends OpMode {
         if (targetPosition < 0) targetPosition = 0;
         if (targetPosition > 1) targetPosition = 1;
 
-        pivotTest.setTargetPosition((int)(COUNT_PER_DEGREE * (MIN_DEGREE + targetPosition * (MAX_DEGREE - MIN_DEGREE))));
+        pivotTest.setTargetPosition((int)(0.4 * COUNT_PER_DEGREE * (MIN_DEGREE + targetPosition * (MAX_DEGREE - MIN_DEGREE))));
         pivotTest.setPower(1.0f);
 
         // Tell the driver the current status.
