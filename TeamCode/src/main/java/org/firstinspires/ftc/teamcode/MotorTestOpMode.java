@@ -18,10 +18,10 @@ public class MotorTestOpMode extends OpMode {
 
     double targetPosition = 0; // Ranges from 0 to 1;
 
-    public static final double MOVE_SPEED = 1.0/1000 ;
+    public static final double MOVE_SPEED = 0.5/1000 ;
 
     public static final int COUNT_PER_REV = 28;
-    public static final int GEAR_REDUCTION = 90;
+    public static final int GEAR_REDUCTION = 60*125/15;
     public static final int COUNT_PER_DEGREE = COUNT_PER_REV*GEAR_REDUCTION/360;
     public static final int MIN_DEGREE = -90;
     public static final int MAX_DEGREE = 0;
@@ -86,12 +86,11 @@ public class MotorTestOpMode extends OpMode {
         double deltaTime = runtime.milliseconds();
         runtime.reset();
 
-        if (gamepad1.left_bumper) targetPosition -= MOVE_SPEED * deltaTime;
-        if (gamepad1.right_bumper) targetPosition += MOVE_SPEED * deltaTime;
+        targetPosition += MOVE_SPEED * deltaTime * gamepad1.left_stick_y;
         if (targetPosition < 0) targetPosition = 0;
         if (targetPosition > 1) targetPosition = 1;
 
-        pivotTest.setTargetPosition((int)(0.4 * COUNT_PER_DEGREE * (MIN_DEGREE + targetPosition * (MAX_DEGREE - MIN_DEGREE))));
+        pivotTest.setTargetPosition((int)(0.8 * COUNT_PER_DEGREE * (MIN_DEGREE + targetPosition * (MAX_DEGREE - MIN_DEGREE))));
         pivotTest.setPower(1.0f);
 
         // Tell the driver the current status.
