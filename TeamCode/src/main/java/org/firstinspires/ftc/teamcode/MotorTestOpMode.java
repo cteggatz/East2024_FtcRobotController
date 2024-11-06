@@ -16,15 +16,16 @@ public class MotorTestOpMode extends OpMode {
     //private DcMotor motorTest = null; // Local reference to the physical motor.
     private DcMotor pivotTest = null; //Local reference to the physical motor.
 
-    double targetPosition = 0; // Ranges from 0 to 1;
+    double targetPosition = ((double)INITIAL_DEGREE-MIN_DEGREE)/(MAX_DEGREE-MIN_DEGREE); // Ranges from 0 to 1;
 
-    public static final double MOVE_SPEED = 0.5/1000 ;
+    public static final double MOVE_SPEED = 0.3/1000 ;
 
     public static final int COUNT_PER_REV = 28;
     public static final int GEAR_REDUCTION = 60*125/15;
     public static final int COUNT_PER_DEGREE = COUNT_PER_REV*GEAR_REDUCTION/360;
-    public static final int MIN_DEGREE = -90;
-    public static final int MAX_DEGREE = 0;
+    public static final int MIN_DEGREE = -70;
+    public static final int INITIAL_DEGREE = 0;
+    public static final int MAX_DEGREE = 10;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -44,6 +45,7 @@ public class MotorTestOpMode extends OpMode {
         //motorTest.setDirection(DcMotor.Direction.FORWARD);
         pivotTest.setDirection(DcMotor.Direction.FORWARD);
         pivotTest.setTargetPosition(0);
+
         pivotTest.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pivotTest.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -91,6 +93,8 @@ public class MotorTestOpMode extends OpMode {
         if (targetPosition > 1) targetPosition = 1;
 
         pivotTest.setTargetPosition((int)(0.8 * COUNT_PER_DEGREE * (MIN_DEGREE + targetPosition * (MAX_DEGREE - MIN_DEGREE))));
+        //if (gamepad1.right_bumper) pivotTest.setTargetPosition(pivotTest.getTargetPosition() + 1);
+        //if (gamepad1.left_bumper) pivotTest.setTargetPosition(pivotTest.getTargetPosition() - 1);
         pivotTest.setPower(1.0f);
 
         // Tell the driver the current status.
