@@ -15,11 +15,9 @@ public class MotorTestOpMode extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime deltaTime = new ElapsedTime();
     double targetPosition = 0;
-    double moveChange = 0;
-    //private DcMotor motorTest = null; // Local reference to the physical motor.
-    private DcMotor pivotTest = null; //Local reference to the physical motor.
 
-    double servoOffset = 0; // Refers to the rotation of the servo.
+    // Electronic references
+    private DcMotor pivotTest = null; //Local reference to the physical motor.
 
     public static final double MOVE_SPEED   =  0.005;
 
