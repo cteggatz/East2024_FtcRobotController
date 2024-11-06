@@ -55,11 +55,8 @@ public class PivotAndLiftDriver extends OpMode{
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         telemetry.addData("Status", "Set Pivot Motor");
 
-        //
+        // Set up lift motor to work correctly
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
-        //liftMotor.setTargetPosition(0);
-        //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         telemetry.addData("Status", "Set Lift Motor");
 
@@ -90,12 +87,15 @@ public class PivotAndLiftDriver extends OpMode{
         }
         liftMotor.setPower(liftPower);
 
-        //liftTargetPosition = Range.clip(liftTargetPosition, LIFT_MIN_ROTATION, LIFT_MAX_ROTATION);
-        //liftMotor.setTargetPosition((int)liftTargetPosition);
-
+        ////////// TELEMETRY OUTPUT //////////
+        // Run Time
         telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Status", "Delta Time: " + deltaTime.toString());
         telemetry.addData("------------", "" );
+        // Lift
         telemetry.addData("Lift", "Target Position: " + liftPower);
         telemetry.addData("Lift", "CurrentPosition: " + liftMotor.getCurrentPosition());
+        telemetry.addData("------------", "" );
+
     }
 }
