@@ -66,7 +66,12 @@ public class MotorTestOpMode extends OpMode {
      */
     @Override
     public void init_loop() {
-
+        if (gamepad1.dpad_left && gamepad1.b) {
+            pivotTest.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            pivotTest.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            pivotTest.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            telemetry.addData("Status", "Reset Motor Encoder");
+        }
     }
 
     /*
