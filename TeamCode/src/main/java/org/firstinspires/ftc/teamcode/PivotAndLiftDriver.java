@@ -49,9 +49,9 @@ public class PivotAndLiftDriver extends OpMode{
 
         // Set the encoder on the pivotMotor to run correctly
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
-        pivotMotor.setTargetPosition(0);
-        pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        pivotMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //pivotMotor.setTargetPosition(0);
+        //pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //pivotMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         telemetry.addData("Status", "Set Pivot Motor");
 
@@ -76,13 +76,25 @@ public class PivotAndLiftDriver extends OpMode{
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
+        ////////// PIVOT LOGIC //////////
+
+        int pivotPosition = pivotMotor.getCurrentPosition();
+        float pivotPower = 0;
+
+        if(gamepad1.right_bumper){
+            pivotPower = 0.5f;
+        } else if(gamepad1.left_bumper){
+            pivotPower = -0.5f;
+        }
+        pivotMotor.setPower(pivotPower);
+
 
         ////////// LIFT LOGIC //////////
         int currentPosition = liftMotor.getCurrentPosition();
         int liftPower = 0;
-        if(gamepad1.left_bumper && currentPosition < 3000){
+        if(gamepad1.left_trigger == 1 && currentPosition < 3000){
             liftPower = 1;
-        } else if(gamepad1.right_bumper && currentPosition > 0){
+        } else if(gamepad1.right_trigger == 1 && currentPosition > 0){
             liftPower = -1;
         }
         liftMotor.setPower(liftPower);
@@ -94,8 +106,13 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("------------", "" );
         // Lift
         telemetry.addData("Lift", "Target Position: " + liftPower);
-        telemetry.addData("Lift", "CurrentPosition: " + liftMotor.getCurrentPosition());
+        telemetry.addData("Lift", "CurrentPosition: " + currentPosition);
         telemetry.addData("------------", "" );
+        // Pivot
+        telemetry.addData("Pivot", "Target Position: " + pivotPower);
+        telemetry.addData("Pivot", "CurrentPosition: " + pivotPosition);
+        telemetry.addData("------------", "" );
+
 
     }
 }

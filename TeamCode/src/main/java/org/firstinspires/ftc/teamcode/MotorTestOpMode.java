@@ -92,14 +92,13 @@ public class MotorTestOpMode extends OpMode {
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
-        if(gamepad1.left_bumper){
+
+        if(gamepad1.right_trigger == 1){
             this.targetPosition = pivotTest.getCurrentPosition() - MOVE_SPEED * dt;
-        } if (gamepad1.right_bumper) {
+        } if (gamepad1.left_trigger == 1) {
             this.targetPosition = pivotTest.getCurrentPosition() + MOVE_SPEED * dt;
         }
-
         pivotTest.setTargetPosition((int)targetPosition);
-
         pivotTest.setPower(1.0f);
 
         // Tell the driver the current status.
