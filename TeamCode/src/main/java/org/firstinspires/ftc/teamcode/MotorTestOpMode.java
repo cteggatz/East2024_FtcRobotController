@@ -23,7 +23,10 @@ public class MotorTestOpMode extends OpMode {
     public static final double MOVE_SPEED   =  0.5 ;
 
     public static final int COUNT_PER_REV = 28;
-    public static final int GEAR_REDUCTION = 90;
+    public static final int GEAR_REDUCTION = 60*125/15;
+    public static final int COUNT_PER_DEGREE = COUNT_PER_REV*GEAR_REDUCTION/360;
+    public static final int MIN_DEGREE = -70;
+    public static final int MAX_DEGREE = 10;
 
     /*
      * Code to run ONCE when the driver hits INIT
