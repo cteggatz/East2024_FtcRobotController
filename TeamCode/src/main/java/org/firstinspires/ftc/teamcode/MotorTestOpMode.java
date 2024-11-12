@@ -23,9 +23,6 @@ public class MotorTestOpMode extends OpMode {
 
     public static final int COUNT_PER_REV = 28;
     public static final int GEAR_REDUCTION = 60*125/15;
-    public static final int COUNT_PER_DEGREE = COUNT_PER_REV*GEAR_REDUCTION/360;
-    public static final int MIN_DEGREE = -70;
-    public static final int MAX_DEGREE = 10;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -64,12 +61,7 @@ public class MotorTestOpMode extends OpMode {
      */
     @Override
     public void init_loop() {
-        if (gamepad1.dpad_left && gamepad1.b) {
-            pivotTest.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            pivotTest.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            pivotTest.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            telemetry.addData("Status", "Reset Motor Encoder");
-        }
+
     }
 
     /*

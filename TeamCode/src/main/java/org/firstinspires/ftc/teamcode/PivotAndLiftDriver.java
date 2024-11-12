@@ -19,13 +19,18 @@ public class PivotAndLiftDriver extends OpMode{
     private DcMotor liftMotor = null; // reference to the motor that controls the lift
 
     ////////// Movement Constants //////////
-    public static final int COUNT_PER_REV = 28;
-    public static final int GEAR_REDUCTION = 60*125/15;
-    public static final int COUNT_PER_DEGREE = COUNT_PER_REV * GEAR_REDUCTION / 360;
-    public static final int MIN_DEGREE = -20;
-    public static final int MAX_DEGREE = 90;
+    public static final double MIN_DEGREE = -95;
+    public static final double MAX_DEGREE = 10;
+    public static final double CUTOFF_PROPORTION = 0.1;
 
-    public static final double MOVE_SPEED = .05/1000;
+    public static final int COUNT_PER_REV = 28;
+    public static final double GEAR_REDUCTION = 60*125/15;
+    public static final double DEGREE_ADJUST = 0.78;
+
+    public static final double COUNT_PER_DEGREE = DEGREE_ADJUST * COUNT_PER_REV * GEAR_REDUCTION / 360;
+    public static final double MIN_COUNT = (MIN_DEGREE*COUNT_PER_DEGREE);
+    public static final double MAX_COUNT = (MAX_DEGREE*COUNT_PER_DEGREE);
+    public static final double CUTOFF_COUNT = CUTOFF_PROPORTION*(MAX_COUNT-MIN_COUNT);
 
     ////////// PIVOT MOTOR VARIABLES //////////
     private float targetPosition = 0;
@@ -64,6 +69,15 @@ public class PivotAndLiftDriver extends OpMode{
     }
 
     @Override
+    public void init_loop() {
+        if (gamepad1.dpad_left && gamepad1.b) {
+            pivotMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            telemetry.addData("Pivot", "Reset Motor Encoder");
+        }
+    }
+
+    @Override
     public void start() {
         // Set the elapsed time to 0.
         runtime.reset();
@@ -79,24 +93,36 @@ public class PivotAndLiftDriver extends OpMode{
         ////////// PIVOT LOGIC //////////
 
         int pivotPosition = pivotMotor.getCurrentPosition();
-        float pivotPower = 0;
+        double pivotPower = 0;
 
         if(gamepad1.right_bumper){
-            pivotPower = 0.5f;
-        } else if(gamepad1.left_bumper){
-            pivotPower = -0.5f;
+            pivotPower += 0.5;
         }
-        pivotMotor.setPower(pivotPower);
+        if(gamepad1.left_bumper){
+            pivotPower -= 0.5;
+        }
+
+        if (MAX_COUNT-pivotPosition < CUTOFF_COUNT && pivotPower > 0 && CUTOFF_PROPORTION > 0) {
+            pivotPower *= (MAX_COUNT-pivotPosition)/((double)CUTOFF_COUNT);
+        }
+
+        if (pivotPosition-MIN_COUNT < CUTOFF_COUNT && pivotPower < 0 && CUTOFF_PROPORTION > 0) {
+            pivotPower *= (pivotPosition-MIN_COUNT)/((double)CUTOFF_COUNT);
+        }
+
+        pivotMotor.setPower(Range.clip(pivotPower,-1,1));
 
 
         ////////// LIFT LOGIC //////////
         int currentPosition = liftMotor.getCurrentPosition();
         int liftPower = 0;
-        if(gamepad1.left_trigger == 1 && currentPosition < 3000){
-            liftPower = 1;
-        } else if(gamepad1.right_trigger == 1 && currentPosition > 0){
-            liftPower = -1;
+        if(gamepad1.left_trigger == 1 && currentPosition < LIFT_MAX_ROTATION){
+            liftPower += 1;
         }
+        if(gamepad1.right_trigger == 1 && currentPosition > LIFT_MIN_ROTATION){
+            liftPower -= 1;
+        }
+
         liftMotor.setPower(liftPower);
 
         ////////// TELEMETRY OUTPUT //////////
@@ -106,11 +132,11 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("------------", "" );
         // Lift
         telemetry.addData("Lift", "Target Position: " + liftPower);
-        telemetry.addData("Lift", "CurrentPosition: " + currentPosition);
+        telemetry.addData("Lift", "Current Position: " + currentPosition);
         telemetry.addData("------------", "" );
         // Pivot
         telemetry.addData("Pivot", "Target Position: " + pivotPower);
-        telemetry.addData("Pivot", "CurrentPosition: " + pivotPosition);
+        telemetry.addData("Pivot", "Current Position: " + pivotPosition);
         telemetry.addData("------------", "" );
 
 
