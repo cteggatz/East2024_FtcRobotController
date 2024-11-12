@@ -21,7 +21,8 @@ public class PivotAndLiftDriver extends OpMode{
     ////////// Movement Constants //////////
     public static final double MIN_DEGREE = -95;
     public static final double MAX_DEGREE = 10;
-    public static final double CUTOFF_PROPORTION = 0.1;
+    public static final double CUTOFF_PROPORTION = 0.05;
+    public static final double PIVOT_SPEED_MULT = 0.8;
 
     public static final int COUNT_PER_REV = 28;
     public static final double GEAR_REDUCTION = 60*125/15;
@@ -34,6 +35,7 @@ public class PivotAndLiftDriver extends OpMode{
 
     ////////// PIVOT MOTOR VARIABLES //////////
     private float targetPosition = 0;
+    private boolean override = false;
 
     ////////// LIFT MOTOR VARIABLES //////////
     private float liftTargetPosition = 0;
@@ -70,11 +72,7 @@ public class PivotAndLiftDriver extends OpMode{
 
     @Override
     public void init_loop() {
-        if (gamepad1.dpad_left && gamepad1.b) {
-            pivotMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            telemetry.addData("Pivot", "Reset Motor Encoder");
-        }
+
     }
 
     @Override
@@ -90,23 +88,30 @@ public class PivotAndLiftDriver extends OpMode{
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
+        if (gamepad1.dpad_left && gamepad1.b) {
+            pivotMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            telemetry.addData("Pivot", "Reset Motor Encoder");
+        }
+
+        if (gamepad1.dpad_right && gamepad1.x) {
+            override = true;
+        } else if (gamepad1.start) {
+            override = false;
+        }
+
         ////////// PIVOT LOGIC //////////
 
         int pivotPosition = pivotMotor.getCurrentPosition();
         double pivotPower = 0;
 
-        if(gamepad1.right_bumper){
-            pivotPower += 0.5;
-        }
-        if(gamepad1.left_bumper){
-            pivotPower -= 0.5;
-        }
+        pivotPower += gamepad1.right_stick_y * PIVOT_SPEED_MULT;
 
-        if (MAX_COUNT-pivotPosition < CUTOFF_COUNT && pivotPower > 0 && CUTOFF_PROPORTION > 0) {
+        if (MAX_COUNT-pivotPosition < CUTOFF_COUNT && pivotPower > 0 && CUTOFF_PROPORTION > 0 && !override) {
             pivotPower *= (MAX_COUNT-pivotPosition)/((double)CUTOFF_COUNT);
         }
 
-        if (pivotPosition-MIN_COUNT < CUTOFF_COUNT && pivotPower < 0 && CUTOFF_PROPORTION > 0) {
+        if (pivotPosition-MIN_COUNT < CUTOFF_COUNT && pivotPower < 0 && CUTOFF_PROPORTION > 0 && !override) {
             pivotPower *= (pivotPosition-MIN_COUNT)/((double)CUTOFF_COUNT);
         }
 
@@ -116,7 +121,7 @@ public class PivotAndLiftDriver extends OpMode{
         ////////// LIFT LOGIC //////////
         int currentPosition = liftMotor.getCurrentPosition();
         int liftPower = 0;
-        if(gamepad1.left_trigger == 1 && currentPosition < LIFT_MAX_ROTATION){
+        if(gamepad1.left_trigger == 1 && (currentPosition < LIFT_MAX_ROTATION || !override)){
             liftPower += 1;
         }
         if(gamepad1.right_trigger == 1 && currentPosition > LIFT_MIN_ROTATION){
