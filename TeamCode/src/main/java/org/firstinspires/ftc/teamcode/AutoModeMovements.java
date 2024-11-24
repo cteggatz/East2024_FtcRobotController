@@ -137,21 +137,34 @@ class Pause extends AutoModeMovements{
 }
 
 class ExtendLift extends  AutoModeMovements{
-
+    DcMotor liftMotor;
     int targetPosition;
+    float direction;
+
+    public ExtendLift(DcMotor liftMotor, int targetPosition){
+        this.liftMotor = liftMotor;
+        this.targetPosition = targetPosition;
+    }
+
 
     @Override
     public boolean isDone() {
-        return false;
+        return Math.abs(targetPosition - liftMotor.getCurrentPosition()) <= MotorData.LIFT_ERROR;
     }
 
     @Override
     public void doMovement() {
+        direction = ((liftMotor.getCurrentPosition() >= targetPosition) ? -1 : 1);
+
+        float currentPosition = liftMotor.getCurrentPosition();
+        if(currentPosition <= MotorData.LIFT_MAX_ROTATION && currentPosition >= MotorData.LIFT_MIN_ROTATION){
+            liftMotor.setPower(direction);
+        }
 
     }
 
     @Override
     public Pair<String, String> getStatus() {
-        return null;
+        return new Pair<>("Extend Lift Movement", "Current Pos: " + liftMotor.getCurrentPosition() + "\nTargetPos: " + this.targetPosition);
     }
 }

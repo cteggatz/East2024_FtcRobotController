@@ -25,14 +25,15 @@ public class MotorData {
     // The calculated speed difference between each speed level
     public static final double DRIVE_MOTOR_SPEED_DIFF = DRIVE_MOTOR_SPEED_LEVELS == 1 ?  0 : (DRIVE_MOTOR_SPEED_MAX - DRIVE_MOTOR_SPEED_MIN) / (DRIVE_MOTOR_SPEED_LEVELS - 1);
 
-    ////////// LIFT MOTOR VARIABLES //////////
+    ////////// PIVOT VARIABLES //////////
     public static final double PIVOT_ERROR_DEGREE = 3;
     public static final double PIVOT_ERROR_COUNT = PIVOT_ERROR_DEGREE * COUNT_PER_DEGREE;
 
 
     ////////// LIFT MOTOR VARIABLES //////////
-    private static final float LIFT_MIN_ROTATION = 0;
-    private static final float LIFT_MAX_ROTATION = 3000;
+    public static final float LIFT_MIN_ROTATION = 0;
+    public static final float LIFT_MAX_ROTATION = 3000;
+    public static final double LIFT_ERROR = 3;
 
     ////////// GRIPPER //////////
     public static final double MID_SERVO   =  0.5 ;

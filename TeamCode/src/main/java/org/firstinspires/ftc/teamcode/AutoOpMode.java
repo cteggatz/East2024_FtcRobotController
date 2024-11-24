@@ -119,9 +119,10 @@ public class AutoOpMode extends OpMode{
 
 
         // adding movements
+        moves.add(new ExtendLift(liftMotor, 0));
         moves.add(new PivotArm(pivotMotor, 0));
 
-        telemetry.addData("Auto", (moves.peek() == null) ? "nothing was added": "stuff in there");
+
 
 
 
@@ -130,15 +131,17 @@ public class AutoOpMode extends OpMode{
 
     @Override
     public void init_loop() {
-        if(!moves.isEmpty() && !override){
+        if(!moves.isEmpty()){
             AutoModeMovements topMove = moves.peek();
             telemetry.addData("Auto", "Doing Stuff");
             if(!topMove.isDone()){
-                telemetry.addData("Auto", "Moving");
                 topMove.doMovement();
+                Pair<String, String> move = topMove.getStatus();
+                telemetry.addData(move.first, move.second);
             } else {
                 telemetry.addData("Auto", "Done");
                 pivotMotor.setPower(0);
+                liftMotor.setPower(0);
                 moves.poll();
             }
         } else {
@@ -153,11 +156,12 @@ public class AutoOpMode extends OpMode{
         deltaTime.reset();
 
         // add moves for autonomous
-        moves.add(new PivotArm(pivotMotor, (int)(MotorData.MAX_COUNT)));
-        moves.add(new Pause(3000));
         moves.add(new PivotArm(pivotMotor, (int)(MotorData.MIN_COUNT)));
-        moves.add(new Pause(3000));
-        moves.add(new PivotArm(pivotMotor, 0));
+        moves.add(new Pause(1000));
+        moves.add(new ExtendLift(liftMotor, 2800));
+        moves.add(new Pause(1000));
+        moves.add(new ExtendLift(liftMotor, 0));
+
 
         liftTargetPosition = liftMotor.getCurrentPosition();
     }
@@ -167,7 +171,7 @@ public class AutoOpMode extends OpMode{
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
-        if(!moves.isEmpty() && !override){
+        if(!moves.isEmpty()){
             AutoModeMovements topMove = moves.peek();
             telemetry.addData("Auto", "Doing Stuff");
             if(!topMove.isDone()){
