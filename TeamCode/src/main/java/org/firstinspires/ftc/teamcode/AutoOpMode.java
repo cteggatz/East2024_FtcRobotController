@@ -142,9 +142,9 @@ public class AutoOpMode extends OpMode{
 
         AutoModeMovements topMove = moves.peek();
         if(topMove != null){
-            if(!topMove.isWorking()){
+            if(!topMove.isDone()){
                 topMove.doMovement();
-            } else if(topMove.isDone()){
+            } else {
                 moves.poll();
             }
         }

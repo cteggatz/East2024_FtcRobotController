@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 /**
  * An interface to describe a movement the bot can do
  */
@@ -27,6 +29,28 @@ class MoveBot extends AutoModeMovements{
     public MoveBot(float targetPosition){
 
     }
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
+
+    @Override
+    public void doMovement() {
+
+    }
+}
+
+class PivotArm extends AutoModeMovements{
+    private DcMotor pivotMotor;
+    int targetPosition;
+
+    public PivotArm(DcMotor pivotMotor, int targetPosition){
+        this.pivotMotor = pivotMotor;
+        this.targetPosition = targetPosition;
+    }
+
+
 
     @Override
     public boolean isDone() {
