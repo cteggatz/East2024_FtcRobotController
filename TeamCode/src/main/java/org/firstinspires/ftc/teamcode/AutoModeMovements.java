@@ -99,7 +99,7 @@ class PivotArm extends AutoModeMovements{
 
     @Override
     public Pair<String, String> getStatus() {
-        return new Pair<>("Pivot Movement", "[Current Pos: " +  pivotMotor.getCurrentPosition() + ", Target Pos: " + this.targetPosition + "]");
+        return new Pair<>("Pivot Movement", "Current Pos: " +  pivotMotor.getCurrentPosition() + "\nTarget Pos: " + this.targetPosition);
     }
 
     private int getTargetPosition(){
@@ -112,25 +112,46 @@ class Pause extends AutoModeMovements{
     private float endTime;
 
     public Pause(float endTime){
-        timer = new ElapsedTime();
+        //timer = new ElapsedTime();
         this.endTime = endTime;
     }
 
 
     @Override
     public boolean isDone() {
-        return timer.milliseconds() >= endTime;
+        return timer != null && timer.milliseconds() >= endTime;
     }
 
     @Override
     public void doMovement() {
-        if(timer.time() == 0){
-            timer.startTime();
+        if(timer == null){
+            timer = new ElapsedTime();
+            timer.reset();
         }
     }
 
     @Override
     public Pair<String, String> getStatus() {
-        return new Pair<>("Timer Movement", "[Target Time: " + endTime + ", Current Time: " + timer.milliseconds() + "]");
+        return new Pair<>("Timer Movement", "Target Time: " + endTime + "\nCurrent Time: " + timer.milliseconds());
+    }
+}
+
+class ExtendLift extends  AutoModeMovements{
+
+    int targetPosition;
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
+
+    @Override
+    public void doMovement() {
+
+    }
+
+    @Override
+    public Pair<String, String> getStatus() {
+        return null;
     }
 }

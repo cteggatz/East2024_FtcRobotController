@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 // imports
+import android.util.Pair;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -169,8 +171,9 @@ public class AutoOpMode extends OpMode{
             AutoModeMovements topMove = moves.peek();
             telemetry.addData("Auto", "Doing Stuff");
             if(!topMove.isDone()){
-                telemetry.addData("Auto", "Moving");
                 topMove.doMovement();
+                Pair<String, String> move = topMove.getStatus();
+                telemetry.addData(move.first, move.second);
             } else {
                 telemetry.addData("Auto", "Done");
                 pivotMotor.setPower(0);
