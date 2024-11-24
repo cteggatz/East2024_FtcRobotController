@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -19,7 +20,8 @@ public class PivotAndLiftDriver extends OpMode{
     private DcMotor rightDrive = null;
     private DcMotor pivotMotor = null; // reference to the motor that controls the lift's pivot
     private DcMotor liftMotor = null; // reference to the motor that controls the lift
-
+    private Servo pivotServo = null;
+    private Servo gripServo = null;
 
     ////////// Movement Constants //////////
     public static final double MIN_DEGREE = -95;
@@ -59,6 +61,13 @@ public class PivotAndLiftDriver extends OpMode{
     private static final float LIFT_MIN_ROTATION = 0;
     private static final float LIFT_MAX_ROTATION = 3000;
 
+    ////////// Gripper //////////
+    private double pivotServoOffset  = 0;
+    private double gripServoOffset = 0;
+
+    public static final double MID_SERVO   =  0.5 ;
+    public static final double SERVO_SPEED  = 0.002 ;
+
 
 
     @Override
@@ -71,6 +80,8 @@ public class PivotAndLiftDriver extends OpMode{
         liftMotor = hardwareMap.get(DcMotor.class, "lift");
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        pivotServo = hardwareMap.get(Servo.class, "pivotServo");
+        gripServo = hardwareMap.get(Servo.class, "gripServo");
         telemetry.addData("Status", "Acquired Electronic References");
 
         // Set the encoder on the pivotMotor to run correctly
@@ -90,12 +101,26 @@ public class PivotAndLiftDriver extends OpMode{
         rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         telemetry.addData("Status", "Initialized Drive Motors");
 
+        // Set up gripper servo
+        pivotServo.setPosition(MID_SERVO);
+        gripServo.setPosition(MID_SERVO);
+
+
         telemetry.addData("Status", "Initializing Finished");
     }
 
     @Override
     public void init_loop() {
-
+        if(gamepad1.dpad_up){
+            liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            liftMotor.setDirection(DcMotor.Direction.FORWARD);
+            liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            telemetry.addData("Status", "reset moter");
+        }
+        if(gamepad1.b){
+            liftMotor.setTargetPosition(0);
+            telemetry.addData("Status", "Moving to zero");
+        }
     }
 
     @Override
@@ -111,18 +136,23 @@ public class PivotAndLiftDriver extends OpMode{
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
+        // OVERRODE LOGIC
         if (gamepad1.dpad_left && gamepad1.b) {
             pivotMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Pivot", "Reset Motor Encoder");
         }
 
+        if (gamepad1.dpad_left && gamepad1.y) {
+            liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            telemetry.addData("Lift", "Reset Lift");
+        }
+
         if (gamepad1.dpad_right && gamepad1.x) {
             override = true;
-            telemetry.addData("Override", "Enabled");
         } else if (gamepad1.start) {
             override = false;
-            telemetry.addData("Override", "Disabled");
         }
 
         ////////// PIVOT LOGIC //////////
@@ -140,16 +170,16 @@ public class PivotAndLiftDriver extends OpMode{
             pivotPower *= (pivotPosition-MIN_COUNT)/((double)CUTOFF_COUNT);
         }
 
-        pivotMotor.setPower(Range.clip(pivotPower,-1,1));
+        pivotMotor.setPower(Range.clip(pivotPower,-1,1) * .5);
 
 
         ////////// LIFT LOGIC //////////
         int currentPosition = liftMotor.getCurrentPosition();
         int liftPower = 0;
-        if(currentPosition < LIFT_MAX_ROTATION || !override){
+        if(currentPosition <= LIFT_MAX_ROTATION || override){
             liftPower += gamepad1.left_trigger;
         }
-        if(currentPosition > LIFT_MIN_ROTATION || !override){
+        if(currentPosition >= LIFT_MIN_ROTATION || override){
             liftPower -= gamepad1.right_trigger;
         }
 
@@ -157,10 +187,10 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// DRIVE & BUMPER LOGIC //////////
 
-        handleBumperPress(dt, gamepad2.left_bumper, gamepad1.right_bumper);
+        handleBumperPress(dt, gamepad2.left_bumper, gamepad2.right_bumper);
 
         double drive = -gamepad2.left_stick_y;
-        double turn  =  gamepad2.right_stick_y;
+        double turn  =  gamepad2.right_stick_x;
         double leftPower = drive + turn;
         double rightPower = drive - turn;
 
@@ -171,7 +201,29 @@ public class PivotAndLiftDriver extends OpMode{
         leftDrive.setPower(leftPower);
         rightDrive.setPower(rightPower);
 
+
+
+        ////////// GIPPER CONTROLLERS //////////
+
+        if(gamepad1.left_bumper){
+            gripServoOffset += SERVO_SPEED;
+        } else if(gamepad1.right_bumper){
+            gripServoOffset -= SERVO_SPEED;
+        }
+        gripServoOffset = Range.clip(gripServoOffset, -0.5, 0.5);
+        gripServo.setPosition(MID_SERVO + gripServoOffset);
+
+        if(gamepad1.dpad_up){
+            pivotServoOffset += SERVO_SPEED;
+        } else if(gamepad1.dpad_down){
+            pivotServoOffset -= SERVO_SPEED;
+        }
+        pivotServoOffset = Range.clip(pivotServoOffset, -0.5, 0.5);
+        pivotServo.setPosition(MID_SERVO + pivotServoOffset);
+
         ////////// TELEMETRY OUTPUT //////////
+        telemetry.addData("Override: ", override);
+        telemetry.addData("------------", "" );
         // Run Time
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Delta Time: " + deltaTime.toString());
@@ -185,9 +237,12 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("Pivot", "Position: " + pivotPosition);
         telemetry.addData("------------", "" );
         // Drive
-        telemetry.addData("Drive Motors", "Left: %.2f" + leftPower);
-        telemetry.addData("Drive Motors", "Right: %.2f" + rightPower);
+        telemetry.addData("Drive Motors", "Left: " + leftPower);
+        telemetry.addData("Drive Motors", "Right: " + rightPower);
         telemetry.addData("------------", "" );
+        // Gripper
+        telemetry.addData("Grip Servo Position", "Left: " + gripServo.getPosition());
+        telemetry.addData("Grip Pivot Servo Position", "Right: " + pivotServo.getPosition());
         telemetry.addData("------------", "" );
 
 
