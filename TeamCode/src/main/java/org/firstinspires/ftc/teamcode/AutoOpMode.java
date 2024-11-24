@@ -78,6 +78,7 @@ public class AutoOpMode extends OpMode{
 
 
 
+
     @Override
     public void init() {
         // Tell the driver that initialization is starting.
@@ -116,7 +117,9 @@ public class AutoOpMode extends OpMode{
 
 
         // adding movements
-        moves.add(new MoveBot(34));
+        moves.add(new PivotArm(pivotMotor, 0));
+
+        telemetry.addData("Auto", (moves.peek() == null) ? "nothing was added": "stuff in there");
 
 
 
@@ -125,6 +128,20 @@ public class AutoOpMode extends OpMode{
 
     @Override
     public void init_loop() {
+        if(!moves.isEmpty() && !override){
+            AutoModeMovements topMove = moves.peek();
+            telemetry.addData("Auto", "Doing Stuff");
+            if(!topMove.isDone()){
+                telemetry.addData("Auto", "Moving");
+                topMove.doMovement();
+            } else {
+                telemetry.addData("Auto", "Done");
+                pivotMotor.setPower(0);
+                moves.poll();
+            }
+        } else {
+            telemetry.addData("Auto", "No more moves");
+        }
     }
 
     @Override
@@ -132,6 +149,14 @@ public class AutoOpMode extends OpMode{
         // Set the elapsed time to 0.
         runtime.reset();
         deltaTime.reset();
+
+        // add moves for autonomous
+        moves.add(new PivotArm(pivotMotor, (int)(MotorData.MAX_COUNT)));
+        moves.add(new Pause(3000));
+        moves.add(new PivotArm(pivotMotor, (int)(MotorData.MIN_COUNT)));
+        moves.add(new Pause(3000));
+        moves.add(new PivotArm(pivotMotor, 0));
+
         liftTargetPosition = liftMotor.getCurrentPosition();
     }
 
@@ -140,43 +165,32 @@ public class AutoOpMode extends OpMode{
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
-        AutoModeMovements topMove = moves.peek();
-        if(topMove != null){
+        if(!moves.isEmpty() && !override){
+            AutoModeMovements topMove = moves.peek();
+            telemetry.addData("Auto", "Doing Stuff");
             if(!topMove.isDone()){
+                telemetry.addData("Auto", "Moving");
                 topMove.doMovement();
             } else {
+                telemetry.addData("Auto", "Done");
+                pivotMotor.setPower(0);
                 moves.poll();
             }
+        } else {
+            telemetry.addData("Auto", "No more moves");
         }
 
 
-        /*
-        ////////// TELEMETRY OUTPUT //////////
-        telemetry.addData("Override: ", override);
+        telemetry.addData("Pivot", "Position: " + pivotMotor.getCurrentPosition());
         telemetry.addData("------------", "" );
-        // Run Time
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Status", "Delta Time: " + deltaTime.toString());
-        telemetry.addData("------------", "" );
-        // Lift
-        telemetry.addData("Lift", "Power: " + liftPower);
-        telemetry.addData("Lift", "Position: " + currentPosition);
-        telemetry.addData("------------", "" );
-        // Pivot
-        telemetry.addData("Pivot", "Power:: " + pivotPower);
-        telemetry.addData("Pivot", "Position: " + pivotPosition);
-        telemetry.addData("------------", "" );
-        // Drive
-        telemetry.addData("Drive Motors", "Left: " + leftPower);
-        telemetry.addData("Drive Motors", "Right: " + rightPower);
-        telemetry.addData("------------", "" );
-        // Gripper
-        telemetry.addData("Grip Servo Position", "Left: " + gripServo.getPosition());
-        telemetry.addData("Grip Pivot Servo Position", "Right: " + pivotServo.getPosition());
-        telemetry.addData("------------", "" );
-
-        */
     }
+
+    @Override
+    public void stop(){
+        telemetry.addData("Pivot", "" + pivotMotor.getCurrentPosition());
+    }
+
+
 
 
     /**
