@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 import android.util.Pair;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -168,5 +169,38 @@ class ExtendLift extends  AutoModeMovements{
     @Override
     public Pair<String, String> getStatus() {
         return new Pair<>("Extend Lift Movement", "Current Pos: " + liftMotor.getCurrentPosition() + "\nTargetPos: " + this.targetPosition);
+    }
+}
+
+class Gripper extends AutoModeMovements{
+    private Servo gripperServo;
+    double targetPosition;
+    boolean initialized = false;
+
+
+    public Gripper(Servo gripperServo, double targetPosition){
+        this.gripperServo = gripperServo;
+        this.targetPosition = targetPosition * .9;
+    }
+
+
+
+    @Override
+    public boolean isDone() {
+        //telemetry.addData("isDone", "" + Math.abs(targetPosition - pivotMotor.getCurrentPosition()));
+        return Math.abs(targetPosition - gripperServo.getPosition()) <= MotorData.GRIPPER_ERROR;
+    }
+
+    @Override
+    public void doMovement() {
+        if (!initialized) {
+            gripperServo.setPosition(targetPosition);
+            initialized = true;
+        }
+    }
+
+    @Override
+    public Pair<String, String> getStatus() {
+        return new Pair<>("Pivot Movement", "Current Pos: " +  gripperServo.getPosition() + "\nTarget Pos: " + this.targetPosition);
     }
 }
