@@ -42,7 +42,7 @@ public class PivotAndLiftDriver extends OpMode{
     public static final double DRIVE_MOTOR_SPEED_MIN = 0.1;
     public static final double DRIVE_MOTOR_SPEED_MAX = 1.0;
     public static final int DRIVE_MOTOR_SPEED_LEVELS = 4;
-    public static final double BUMPER_DEBOUNCE_TIME  = 10.0; // Minimum number of milliseconds between bumper presses
+    public static final double BUMPER_DEBOUNCE_TIME  = 50.0; // Minimum number of milliseconds between bumper presses
 
     // The calculated speed difference between each speed level
     public static final double DRIVE_MOTOR_SPEED_DIFF = DRIVE_MOTOR_SPEED_LEVELS == 1 ?  0 : (DRIVE_MOTOR_SPEED_MAX - DRIVE_MOTOR_SPEED_MIN) / (DRIVE_MOTOR_SPEED_LEVELS - 1);
@@ -134,7 +134,7 @@ public class PivotAndLiftDriver extends OpMode{
     @Override
     public void loop() {
         double dt = deltaTime.milliseconds();
-        runtime.reset();
+        deltaTime.reset();
 
         // OVERRODE LOGIC
         if (gamepad1.dpad_left && gamepad1.b) {
@@ -239,6 +239,7 @@ public class PivotAndLiftDriver extends OpMode{
         // Drive
         telemetry.addData("Drive Motors", "Left: " + leftPower);
         telemetry.addData("Drive Motors", "Right: " + rightPower);
+        telemetry.addData("Drive Motors", "Speed Level: " + currentSpeedLevel);
         telemetry.addData("------------", "" );
         // Gripper
         telemetry.addData("Grip Servo Position", "Left: " + gripServo.getPosition());
@@ -251,13 +252,13 @@ public class PivotAndLiftDriver extends OpMode{
 
     /**
      * If either of the bumpers are being pressed, update currentSpeedLevel and handle button press debounce.
-     * @param deltaTime The time since the function was last called, in milliseconds.
+     * @param dt The time since the function was last called, in milliseconds.
      * @param decrementButtonPressed Whether the button to decrement currentSpeedLevel is being pressed.
      * @param incrementButtonPressed Whether the button to increment currentSpeedLevel is being pressed.
      */
-    private void handleBumperPress(double deltaTime, boolean decrementButtonPressed, boolean incrementButtonPressed) {
+    private void handleBumperPress(double dt, boolean decrementButtonPressed, boolean incrementButtonPressed) {
         // Decrease debounce cooldown by time passed.
-        bumperDecrementCooldown -= deltaTime;
+        bumperDecrementCooldown -= dt;
         if (bumperDecrementCooldown < 0.0) bumperDecrementCooldown = 0.0;
 
         if (decrementButtonPressed) {
@@ -272,7 +273,7 @@ public class PivotAndLiftDriver extends OpMode{
         }
 
         // Decrease debounce cooldown by time passed.
-        bumperIncrementCooldown -= deltaTime;
+        bumperIncrementCooldown -= dt;
         if (bumperIncrementCooldown < 0.0) bumperIncrementCooldown = 0.0;
 
         if (incrementButtonPressed) {

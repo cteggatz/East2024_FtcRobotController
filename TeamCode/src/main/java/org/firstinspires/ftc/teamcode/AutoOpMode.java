@@ -169,7 +169,7 @@ public class AutoOpMode extends OpMode{
     @Override
     public void loop() {
         double dt = deltaTime.milliseconds();
-        runtime.reset();
+        deltaTime.reset();
 
         if(!moves.isEmpty()){
             AutoModeMovements topMove = moves.peek();
