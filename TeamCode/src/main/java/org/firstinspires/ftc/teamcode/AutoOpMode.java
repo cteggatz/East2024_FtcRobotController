@@ -131,22 +131,7 @@ public class AutoOpMode extends OpMode{
 
     @Override
     public void init_loop() {
-        if(!moves.isEmpty()){
-            AutoModeMovements topMove = moves.peek();
-            telemetry.addData("Auto", "Doing Stuff");
-            if(!topMove.isDone()){
-                topMove.doMovement();
-                Pair<String, String> move = topMove.getStatus();
-                telemetry.addData(move.first, move.second);
-            } else {
-                telemetry.addData("Auto", "Done");
-                pivotMotor.setPower(0);
-                liftMotor.setPower(0);
-                moves.poll();
-            }
-        } else {
-            telemetry.addData("Auto", "No more moves");
-        }
+        this.handleActionQueue();
     }
 
     @Override
@@ -156,11 +141,11 @@ public class AutoOpMode extends OpMode{
         deltaTime.reset();
 
         // add moves for autonomous
-        moves.add(new PivotArm(pivotMotor, (int)(MotorData.MIN_COUNT)));
-        moves.add(new Pause(1000));
+        moves.add(new PivotArm(pivotMotor, 0));
         moves.add(new ExtendLift(liftMotor, 3000));
         moves.add(new Pause(1000));
-        moves.add(new ExtendLift(liftMotor, 0));
+        AutoModeMovements[] moveDown = {new ExtendLift(liftMotor, 0), new PivotArm(pivotMotor, (int)MotorData.MIN_COUNT)};
+        moves.add(new MultiMove(moveDown));
 
 
         liftTargetPosition = liftMotor.getCurrentPosition();
@@ -171,23 +156,7 @@ public class AutoOpMode extends OpMode{
         double dt = deltaTime.milliseconds();
         runtime.reset();
 
-        if(!moves.isEmpty()){
-            AutoModeMovements topMove = moves.peek();
-            telemetry.addData("Auto", "Doing Stuff");
-            if(!topMove.isDone()){
-                topMove.doMovement();
-                Pair<String, String> move = topMove.getStatus();
-                telemetry.addData(move.first, move.second);
-            } else {
-                telemetry.addData("Auto", "Done");
-                pivotMotor.setPower(0);
-                liftMotor.setPower(0);
-                moves.poll();
-            }
-        } else {
-            telemetry.addData("Auto", "No more moves");
-        }
-
+        this.handleActionQueue();
 
         telemetry.addData("Pivot", "Position: " + pivotMotor.getCurrentPosition());
         telemetry.addData("------------", "" );
@@ -236,6 +205,24 @@ public class AutoOpMode extends OpMode{
 
             // Reset debounce cooldown.
             bumperIncrementCooldown = BUMPER_DEBOUNCE_TIME;
+        }
+    }
+
+    private void handleActionQueue(){
+        if(!moves.isEmpty()){
+            AutoModeMovements topMove = moves.peek();
+            telemetry.addData("Auto", "Doing Stuff");
+            if(!topMove.isDone()){
+                topMove.doMovement();
+                Pair<String, String> move = topMove.getStatus();
+                telemetry.addData(move.first, move.second);
+            } else {
+                telemetry.addData("Auto", "Done");
+                moves.peek().onEnd();
+                moves.poll();
+            }
+        } else {
+            telemetry.addData("Auto", "No more moves");
         }
     }
 

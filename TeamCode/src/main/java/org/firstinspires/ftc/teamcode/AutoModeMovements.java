@@ -19,6 +19,8 @@ public abstract class AutoModeMovements {
 
     public abstract boolean isDone();
     public abstract void doMovement();
+    public abstract void onStart();
+    public abstract void onEnd();
     public abstract Pair<String, String> getStatus();
 
 
@@ -48,6 +50,16 @@ class MoveBot extends AutoModeMovements{
 
     @Override
     public void doMovement() {
+
+    }
+
+    @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onEnd() {
 
     }
 
@@ -99,6 +111,16 @@ class PivotArm extends AutoModeMovements{
     }
 
     @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onEnd() {
+        pivotMotor.setPower(0);
+    }
+
+    @Override
     public Pair<String, String> getStatus() {
         return new Pair<>("Pivot Movement", "Current Pos: " +  pivotMotor.getCurrentPosition() + "\nTarget Pos: " + this.targetPosition);
     }
@@ -129,6 +151,16 @@ class Pause extends AutoModeMovements{
             timer = new ElapsedTime();
             timer.reset();
         }
+    }
+
+    @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onEnd() {
+
     }
 
     @Override
@@ -167,6 +199,16 @@ class ExtendLift extends  AutoModeMovements{
     }
 
     @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onEnd() {
+        liftMotor.setPower(0);
+    }
+
+    @Override
     public Pair<String, String> getStatus() {
         return new Pair<>("Extend Lift Movement", "Current Pos: " + liftMotor.getCurrentPosition() + "\nTargetPos: " + this.targetPosition);
     }
@@ -200,7 +242,72 @@ class Gripper extends AutoModeMovements{
     }
 
     @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onEnd() {
+
+    }
+
+    @Override
     public Pair<String, String> getStatus() {
         return new Pair<>("Pivot Movement", "Current Pos: " +  gripperServo.getPosition() + "\nTarget Pos: " + this.targetPosition);
+    }
+}
+
+class MultiMove extends AutoModeMovements{
+
+    AutoModeMovements[] moves;
+
+    public MultiMove(AutoModeMovements[] moves){
+        this.moves = moves;
+    }
+
+
+    @Override
+    public boolean isDone() {
+        for(AutoModeMovements m: moves){
+            if(!m.isDone())
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void doMovement() {
+        for(AutoModeMovements m: moves){
+            if(!m.isDone()){
+                m.doMovement();
+            }
+        }
+    }
+
+    @Override
+    public void onStart() {
+        for(AutoModeMovements m: moves){
+            if(!m.isDone()){
+                m.onStart();
+            }
+        }
+    }
+
+    @Override
+    public void onEnd() {
+        for(AutoModeMovements m: moves){
+            m.onEnd();
+        }
+    }
+
+    @Override
+    public Pair<String, String> getStatus() {
+        String returnString = "";
+        for(AutoModeMovements m: moves){
+            Pair<String, String> mStatus = m.getStatus();
+            returnString = returnString + "\n * " + mStatus.first + " | " + mStatus.second;
+        }
+
+        return new Pair<>("MultiAction", returnString);
     }
 }
