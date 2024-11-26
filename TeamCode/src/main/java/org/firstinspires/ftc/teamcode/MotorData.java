@@ -36,6 +36,5 @@ public class MotorData {
     public static final double LIFT_ERROR = 3;
 
     ////////// GRIPPER //////////
-    public static final double MID_SERVO   =  0.5 ;
-    public static final double SERVO_SPEED  = 0.002 ;
+    public static final double GRIPPER_ERROR = 0.05;
 }
