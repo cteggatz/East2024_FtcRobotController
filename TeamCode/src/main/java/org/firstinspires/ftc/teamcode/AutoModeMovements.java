@@ -157,8 +157,10 @@ class ExtendLift extends  AutoModeMovements{
         direction = ((liftMotor.getCurrentPosition() >= targetPosition) ? -1 : 1);
 
         float currentPosition = liftMotor.getCurrentPosition();
-        if(currentPosition <= MotorData.LIFT_MAX_ROTATION && currentPosition >= MotorData.LIFT_MIN_ROTATION){
+        if((currentPosition <= MotorData.LIFT_MAX_ROTATION && direction > 0) || (currentPosition >= MotorData.LIFT_MIN_ROTATION && direction < 0)){
             liftMotor.setPower(direction);
+        } else {
+            liftMotor.setPower(0);
         }
 
     }

@@ -158,7 +158,7 @@ public class AutoOpMode extends OpMode{
         // add moves for autonomous
         moves.add(new PivotArm(pivotMotor, (int)(MotorData.MIN_COUNT)));
         moves.add(new Pause(1000));
-        moves.add(new ExtendLift(liftMotor, 2800));
+        moves.add(new ExtendLift(liftMotor, 3000));
         moves.add(new Pause(1000));
         moves.add(new ExtendLift(liftMotor, 0));
 
@@ -181,6 +181,7 @@ public class AutoOpMode extends OpMode{
             } else {
                 telemetry.addData("Auto", "Done");
                 pivotMotor.setPower(0);
+                liftMotor.setPower(0);
                 moves.poll();
             }
         } else {
