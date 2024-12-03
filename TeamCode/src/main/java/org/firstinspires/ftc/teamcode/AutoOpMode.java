@@ -11,6 +11,18 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.AutoMoves.AutoModeMovements;
+import org.firstinspires.ftc.teamcode.AutoMoves.ExtendLift;
+import org.firstinspires.ftc.teamcode.AutoMoves.GripPivot;
+import org.firstinspires.ftc.teamcode.AutoMoves.Gripper;
+import org.firstinspires.ftc.teamcode.AutoMoves.MultiMove;
+import org.firstinspires.ftc.teamcode.AutoMoves.Pause;
+import org.firstinspires.ftc.teamcode.AutoMoves.PivotArm;
+import org.firstinspires.ftc.teamcode.AutoMoves.QueueMove;
+import org.firstinspires.ftc.teamcode.Macros.PickUp;
+import org.firstinspires.ftc.teamcode.Macros.PutInBasket;
+import org.firstinspires.ftc.teamcode.Macros.ResetArm;
+
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -119,12 +131,7 @@ public class AutoOpMode extends OpMode{
 
 
         // adding movements
-        moves.add(new ExtendLift(liftMotor, 0));
-        moves.add(new PivotArm(pivotMotor, 0));
-
-
-
-
+        moves.add(new ResetArm(gripServo, pivotServo, liftMotor, pivotMotor));
 
         telemetry.addData("Status", "Initializing Finished");
     }
@@ -141,11 +148,14 @@ public class AutoOpMode extends OpMode{
         deltaTime.reset();
 
         // add moves for autonomous
-        moves.add(new PivotArm(pivotMotor, 0));
-        moves.add(new ExtendLift(liftMotor, 3000));
-        moves.add(new Pause(1000));
-        AutoModeMovements[] moveDown = {new ExtendLift(liftMotor, 0), new PivotArm(pivotMotor, (int)MotorData.MIN_COUNT)};
-        moves.add(new MultiMove(moveDown));
+        moves.add(new QueueMove(new AutoModeMovements[]{
+                new PivotArm(pivotMotor, (int)MotorData.MAX_COUNT),
+                new Pause(250),
+                new ExtendLift(liftMotor, 250),
+        }));
+
+        moves.add(new PickUp(gripServo, pivotServo, liftMotor, pivotMotor));
+        moves.add(new PutInBasket(pivotMotor, liftMotor));
 
 
         liftTargetPosition = liftMotor.getCurrentPosition();
