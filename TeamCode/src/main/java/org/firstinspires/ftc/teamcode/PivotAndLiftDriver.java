@@ -134,7 +134,7 @@ public class PivotAndLiftDriver extends OpMode{
     @Override
     public void loop() {
         double dt = deltaTime.milliseconds();
-        runtime.reset();
+        deltaTime.reset();
 
         // OVERRODE LOGIC
         if (gamepad1.dpad_left && gamepad1.b) {
