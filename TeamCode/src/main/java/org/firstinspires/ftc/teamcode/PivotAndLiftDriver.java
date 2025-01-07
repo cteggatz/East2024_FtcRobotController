@@ -24,8 +24,8 @@ public class PivotAndLiftDriver extends OpMode{
     private Servo gripServo = null;
 
     ////////// Movement Constants //////////
-    public static final double MIN_DEGREE = -95;
-    public static final double MAX_DEGREE = 10;
+    public static final double MIN_DEGREE = 95;
+    public static final double MAX_DEGREE = -10;
     public static final double CUTOFF_PROPORTION = 0.05;
     public static final double PIVOT_SPEED_MULT = 0.8;
 
@@ -170,7 +170,7 @@ public class PivotAndLiftDriver extends OpMode{
             pivotPower *= (pivotPosition-MIN_COUNT)/((double)CUTOFF_COUNT);
         }
 
-        pivotMotor.setPower(Range.clip(pivotPower,-1,1) * .5);
+        pivotMotor.setPower(Range.clip(pivotPower,-1,1));
 
 
         ////////// LIFT LOGIC //////////
@@ -204,14 +204,13 @@ public class PivotAndLiftDriver extends OpMode{
 
 
         ////////// GIPPER CONTROLLERS //////////
-
+        // gripper
         if(gamepad1.left_bumper){
-            gripServoOffset += SERVO_SPEED;
+            gripServo.setPosition(MID_SERVO + .3);
         } else if(gamepad1.right_bumper){
-            gripServoOffset -= SERVO_SPEED;
+            gripServo.setPosition(MID_SERVO +.5);
         }
-        gripServoOffset = Range.clip(gripServoOffset, -0.5, 0.5);
-        gripServo.setPosition(MID_SERVO + gripServoOffset);
+
 
         if(gamepad1.dpad_up){
             pivotServoOffset += SERVO_SPEED;
