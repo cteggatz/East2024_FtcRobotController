@@ -58,8 +58,8 @@ public class PivotAndLiftDriver extends OpMode{
 
     ////////// LIFT MOTOR VARIABLES //////////
     private float liftTargetPosition = 0;
-    private static final float LIFT_MIN_ROTATION = 0;
-    private static final float LIFT_MAX_ROTATION = 3000;
+    private static final float LIFT_MIN_ROTATION = -8550;
+    private static final float LIFT_MAX_ROTATION = 0;
 
     ////////// Gripper //////////
     private double pivotServoOffset  = 0;
@@ -102,9 +102,9 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("Status", "Initialized Drive Motors");
 
         // Set up gripper servo
-        pivotServo.setPosition(MID_SERVO);
-        gripServo.setPosition(MID_SERVO);
-
+        pivotServoOffset = pivotServo.getPosition();
+        gripServoOffset = gripServo.getPosition();
+        telemetry.addData("Status", pivotServoOffset);
 
         telemetry.addData("Status", "Initializing Finished");
     }
@@ -129,6 +129,9 @@ public class PivotAndLiftDriver extends OpMode{
         runtime.reset();
         deltaTime.reset();
         liftTargetPosition = liftMotor.getCurrentPosition();
+        pivotServoOffset = pivotServo.getPosition() - MID_SERVO;
+        gripServoOffset = gripServo.getPosition();
+
     }
 
     @Override
