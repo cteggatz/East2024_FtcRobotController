@@ -58,7 +58,7 @@ public class PivotAndLiftDriver extends OpMode{
 
     ////////// LIFT MOTOR VARIABLES //////////
     private float liftTargetPosition = 0;
-    private static final float LIFT_MIN_ROTATION = -8550;
+    private static final float LIFT_MIN_ROTATION = -4000;
     private static final float LIFT_MAX_ROTATION = 0;
 
     ////////// Gripper //////////
@@ -178,7 +178,7 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// LIFT LOGIC //////////
         int currentPosition = liftMotor.getCurrentPosition();
-        int liftPower = 0;
+        double liftPower = 0;
         if(currentPosition <= LIFT_MAX_ROTATION || override){
             liftPower += gamepad1.left_trigger;
         }
