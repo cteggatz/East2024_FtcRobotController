@@ -58,8 +58,8 @@ public class PivotAndLiftDriver extends OpMode{
 
     ////////// LIFT MOTOR VARIABLES //////////
     private float liftTargetPosition = 0;
-    private static final float LIFT_MIN_ROTATION = 0;
-    private static final float LIFT_MAX_ROTATION = 3000;
+    private static final float LIFT_MIN_ROTATION = -4000;
+    private static final float LIFT_MAX_ROTATION = 10;
 
     ////////// Gripper //////////
     private double pivotServoOffset  = 0;
@@ -91,6 +91,7 @@ public class PivotAndLiftDriver extends OpMode{
 
         // Set up lift motor to work correctly
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
+        //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         telemetry.addData("Status", "Initialized Lift Motor");
 
@@ -102,8 +103,11 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("Status", "Initialized Drive Motors");
 
         // Set up gripper servo
-        pivotServo.setPosition(MID_SERVO);
+        //pivotServo.setPosition(MID_SERVO);
         gripServo.setPosition(MID_SERVO);
+
+        telemetry.addData("Motor Position", liftMotor.getTargetPosition());
+        liftMotor.setTargetPosition(400);
 
 
         telemetry.addData("Status", "Initializing Finished");
@@ -174,16 +178,31 @@ public class PivotAndLiftDriver extends OpMode{
 
 
         ////////// LIFT LOGIC //////////
+        /*
         int currentPosition = liftMotor.getCurrentPosition();
-        int liftPower = 0;
+        int targetPosition = liftMotor.getTargetPosition();
+        if(gamepad1.left_trigger > 0.5 && (currentPosition <= LIFT_MAX_ROTATION || override)){
+            targetPosition += 1;
+        }
+        if(gamepad1.right_trigger > 0.5 && (currentPosition >= LIFT_MIN_ROTATION || override)){
+            targetPosition -= 1;
+        }
+        liftMotor.setPower(1);
+        liftMotor.setTargetPosition(targetPosition);
+        */
+
+
+
+        int currentPosition = liftMotor.getCurrentPosition();
+        double liftPower = 0;
         if(currentPosition <= LIFT_MAX_ROTATION || override){
             liftPower += gamepad1.left_trigger;
         }
         if(currentPosition >= LIFT_MIN_ROTATION || override){
             liftPower -= gamepad1.right_trigger;
         }
-
         liftMotor.setPower(Range.clip(liftPower, -1, 1));
+
 
         ////////// DRIVE & BUMPER LOGIC //////////
 
@@ -229,7 +248,8 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("Status", "Delta Time: " + deltaTime.toString());
         telemetry.addData("------------", "" );
         // Lift
-        telemetry.addData("Lift", "Power: " + liftPower);
+        //telemetry.addData("Lift", "Power: " + liftPower);
+        telemetry.addData("Lift", "TargetPosition" + targetPosition);
         telemetry.addData("Lift", "Position: " + currentPosition);
         telemetry.addData("------------", "" );
         // Pivot
@@ -239,6 +259,7 @@ public class PivotAndLiftDriver extends OpMode{
         // Drive
         telemetry.addData("Drive Motors", "Left: " + leftPower);
         telemetry.addData("Drive Motors", "Right: " + rightPower);
+        telemetry.addData("Drive Motors", "Speed: " + speedMult);
         telemetry.addData("------------", "" );
         // Gripper
         telemetry.addData("Grip Servo Position", "Left: " + gripServo.getPosition());
