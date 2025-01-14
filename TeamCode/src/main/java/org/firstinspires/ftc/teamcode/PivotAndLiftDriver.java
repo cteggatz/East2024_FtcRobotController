@@ -24,19 +24,19 @@ public class PivotAndLiftDriver extends OpMode{
     private Servo gripServo = null;
 
     ////////// Movement Constants //////////
-    public static final double MIN_DEGREE = 95;
-    public static final double MAX_DEGREE = -10;
-    public static final double CUTOFF_PROPORTION = 0.05;
+    public static final double PIVOT_MIN_DEGREE = 95;
+    public static final double PIVOT_MAX_DEGREE = -10;
+    public static final double PIVOT_CUTOFF_PROPORTION = 0.05;
     public static final double PIVOT_SPEED_MULT = 0.8;
 
-    public static final int COUNT_PER_REV = 28;
-    public static final double GEAR_REDUCTION = 60*125/15;
-    public static final double DEGREE_ADJUST = 0.78;
+    public static final int PIVOT_COUNT_PER_REV = 28;
+    public static final double PIVOT_GEAR_REDUCTION = 60*125/15;
+    public static final double PIVOT_DEGREE_ADJUST = 0.78;
 
-    public static final double COUNT_PER_DEGREE = DEGREE_ADJUST * COUNT_PER_REV * GEAR_REDUCTION / 360;
-    public static final double MIN_COUNT = (MIN_DEGREE*COUNT_PER_DEGREE);
-    public static final double MAX_COUNT = (MAX_DEGREE*COUNT_PER_DEGREE);
-    public static final double CUTOFF_COUNT = CUTOFF_PROPORTION*(MAX_COUNT-MIN_COUNT);
+    public static final double PIVOT_COUNT_PER_DEGREE = PIVOT_DEGREE_ADJUST * PIVOT_COUNT_PER_REV * PIVOT_GEAR_REDUCTION / 360;
+    public static final double PIVOT_MIN_COUNT = (PIVOT_MIN_DEGREE*PIVOT_COUNT_PER_DEGREE);
+    public static final double PIVOT_MAX_COUNT = (PIVOT_MAX_DEGREE*PIVOT_COUNT_PER_DEGREE);
+    public static final double PIVOT_CUTOFF_COUNT = PIVOT_CUTOFF_PROPORTION*(PIVOT_MAX_COUNT-PIVOT_MIN_COUNT);
 
 
     public static final double DRIVE_MOTOR_SPEED_MIN = 0.1;
@@ -57,9 +57,11 @@ public class PivotAndLiftDriver extends OpMode{
     private boolean override = false;
 
     ////////// LIFT MOTOR VARIABLES //////////
-    private float liftTargetPosition = 0;
-    private static final float LIFT_MIN_ROTATION = -8550;
-    private static final float LIFT_MAX_ROTATION = 0;
+    private int liftTargetPosition = 0;
+    private static final double LIFT_MIN_ROTATION = -4000;
+    private static final double LIFT_MAX_ROTATION = 0;
+    private static final double LIFT_CUTOFF_COUNT = 0.1*(LIFT_MAX_ROTATION-LIFT_MIN_ROTATION);
+    private static final double LIFT_AUTO_COUNT = 50;
 
     ////////// Gripper //////////
     private double pivotServoOffset  = 0;
@@ -165,28 +167,37 @@ public class PivotAndLiftDriver extends OpMode{
 
         pivotPower += gamepad1.left_stick_y * PIVOT_SPEED_MULT;
 
-        if (MAX_COUNT-pivotPosition < CUTOFF_COUNT && pivotPower > 0 && CUTOFF_PROPORTION > 0 && !override) {
-            pivotPower *= (MAX_COUNT-pivotPosition)/((double)CUTOFF_COUNT);
+        if (PIVOT_MAX_COUNT-pivotPosition < PIVOT_CUTOFF_COUNT && pivotPower > 0 && PIVOT_CUTOFF_PROPORTION > 0 && !override) {
+            pivotPower *= (PIVOT_MAX_COUNT-pivotPosition)/((double)PIVOT_CUTOFF_COUNT);
         }
 
-        if (pivotPosition-MIN_COUNT < CUTOFF_COUNT && pivotPower < 0 && CUTOFF_PROPORTION > 0 && !override) {
-            pivotPower *= (pivotPosition-MIN_COUNT)/((double)CUTOFF_COUNT);
+        if (pivotPosition-PIVOT_MIN_COUNT < PIVOT_CUTOFF_COUNT && pivotPower < 0 && PIVOT_CUTOFF_PROPORTION > 0 && !override) {
+            pivotPower *= (pivotPosition-PIVOT_MIN_COUNT)/((double)PIVOT_CUTOFF_COUNT);
         }
 
         pivotMotor.setPower(Range.clip(pivotPower,-1,1));
 
 
         ////////// LIFT LOGIC //////////
-        int currentPosition = liftMotor.getCurrentPosition();
-        int liftPower = 0;
-        if(currentPosition <= LIFT_MAX_ROTATION || override){
-            liftPower += gamepad1.left_trigger;
-        }
-        if(currentPosition >= LIFT_MIN_ROTATION || override){
-            liftPower -= gamepad1.right_trigger;
+
+        int liftPosition = liftMotor.getCurrentPosition();
+
+        double liftPower = gamepad1.left_trigger - gamepad1.right_trigger;
+        if (liftPower != 0) {
+            liftTargetPosition = liftPosition;
+        } else if (liftTargetPosition < 100 && LIFT_AUTO_COUNT > 0) {
+            liftPower = Range.clip ((liftTargetPosition-liftPosition)/LIFT_AUTO_COUNT,-1.0,1.0);
         }
 
-        liftMotor.setPower(Range.clip(liftPower, -1, 1));
+        if (LIFT_MAX_ROTATION-liftPosition < LIFT_CUTOFF_COUNT && liftPower > 0 && LIFT_CUTOFF_COUNT > 0 && !override) {
+            liftPower *= (LIFT_MAX_ROTATION-liftPosition)/LIFT_CUTOFF_COUNT;
+        }
+
+        if (liftPosition-LIFT_MIN_ROTATION < LIFT_CUTOFF_COUNT && liftPower < 0 && LIFT_CUTOFF_COUNT > 0 && !override) {
+            liftPower *= (liftPosition-LIFT_MIN_ROTATION)/LIFT_CUTOFF_COUNT;
+        }
+
+        liftMotor.setPower(Range.clip(liftPower,-1,1));
 
         ////////// DRIVE & BUMPER LOGIC //////////
 
@@ -232,7 +243,7 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("------------", "" );
         // Lift
         telemetry.addData("Lift", "Power: " + liftPower);
-        telemetry.addData("Lift", "Position: " + currentPosition);
+        telemetry.addData("Lift", "Position: " + liftPosition);
         telemetry.addData("------------", "" );
         // Pivot
         telemetry.addData("Pivot", "Power:: " + pivotPower);
