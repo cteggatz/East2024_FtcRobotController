@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.ManualOpmodes;
 
 // imports
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.teamcode.Managers.RotationManager;
 
 @TeleOp(name="PivotAndLift_Driver", group="Iterative OpMode")
 public class PivotAndLiftDriver extends OpMode{
@@ -57,11 +59,7 @@ public class PivotAndLiftDriver extends OpMode{
     private boolean override = false;
 
     ////////// LIFT MOTOR VARIABLES //////////
-    private int liftTargetPosition = 0;
-    private static final double LIFT_MIN_ROTATION = -4000;
-    private static final double LIFT_MAX_ROTATION = 0;
-    private static final double LIFT_CUTOFF_COUNT = 0.1*(LIFT_MAX_ROTATION-LIFT_MIN_ROTATION);
-    private static final double LIFT_AUTO_COUNT = 50;
+    private RotationManager liftManager;
 
     ////////// Gripper //////////
     private double pivotServoOffset  = 0;
@@ -94,6 +92,11 @@ public class PivotAndLiftDriver extends OpMode{
         // Set up lift motor to work correctly
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftManager
+                .UsingCounts(28)
+                .Min(-4000, 400)
+                .Max(0, 400)
+                .Auto(50);
         telemetry.addData("Status", "Initialized Lift Motor");
 
         // Set up left and right drive to work correctly
@@ -130,7 +133,6 @@ public class PivotAndLiftDriver extends OpMode{
         // Set the elapsed time to 0.
         runtime.reset();
         deltaTime.reset();
-        liftTargetPosition = liftMotor.getCurrentPosition();
         pivotServoOffset = pivotServo.getPosition() - MID_SERVO;
         gripServoOffset = gripServo.getPosition();
 
@@ -179,25 +181,13 @@ public class PivotAndLiftDriver extends OpMode{
 
 
         ////////// LIFT LOGIC //////////
+        liftManager.UpdateRotation(liftMotor.getCurrentPosition());
+        liftManager.SetTargetPower(gamepad1.left_trigger-gamepad1.right_trigger);
 
-        int liftPosition = liftMotor.getCurrentPosition();
+        double liftPosition = liftManager.GetRotation();
+        double liftPower = liftManager.GetFinalPower(override);
 
-        double liftPower = gamepad1.left_trigger - gamepad1.right_trigger;
-        if (liftPower != 0) {
-            liftTargetPosition = liftPosition;
-        } else if (liftTargetPosition < 100 && LIFT_AUTO_COUNT > 0) {
-            liftPower = Range.clip ((liftTargetPosition-liftPosition)/LIFT_AUTO_COUNT,-1.0,1.0);
-        }
-
-        if (LIFT_MAX_ROTATION-liftPosition < LIFT_CUTOFF_COUNT && liftPower > 0 && LIFT_CUTOFF_COUNT > 0 && !override) {
-            liftPower *= (LIFT_MAX_ROTATION-liftPosition)/LIFT_CUTOFF_COUNT;
-        }
-
-        if (liftPosition-LIFT_MIN_ROTATION < LIFT_CUTOFF_COUNT && liftPower < 0 && LIFT_CUTOFF_COUNT > 0 && !override) {
-            liftPower *= (liftPosition-LIFT_MIN_ROTATION)/LIFT_CUTOFF_COUNT;
-        }
-
-        liftMotor.setPower(Range.clip(liftPower,-1,1));
+        liftMotor.setPower(liftPower);
 
         ////////// DRIVE & BUMPER LOGIC //////////
 
