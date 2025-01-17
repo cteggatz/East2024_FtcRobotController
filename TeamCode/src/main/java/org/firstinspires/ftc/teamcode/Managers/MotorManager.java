@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Managers;
 
 import com.qualcomm.robotcore.util.Range;
 
-public class RotationManager {
+public class MotorManager {
     private double rotation = 0;
     private double gearRatio = 1;
     private double mult = 1;
@@ -20,62 +20,62 @@ public class RotationManager {
     private double maxCutoff;
     private boolean hasMax = false;
 
-    public RotationManager() {
+    public MotorManager() {
 
     }
 
-    public RotationManager UsingRevolutions() {
-        this.mult = 1.0;
-        return this;
-    }
-
-    public RotationManager UsingCounts(int counts) {
-        this.mult = 1.0/counts;
-        return this;
-    }
-
-    public RotationManager UsingDegrees() {
-        this.mult = 1.0/360;
-        return this;
-    }
-
-    public RotationManager UsingRadians() {
-        this.mult = 1.0/(2*Math.PI);
-        return this;
-    }
-
-    public RotationManager UsingGearIncrease(double gearRatio) {
+    public MotorManager UsingGearIncrease(double gearRatio) {
         this.gearRatio = gearRatio;
         return this;
     }
 
-    public RotationManager UsingGearReduction(double gearRatio) {
+    public MotorManager UsingGearReduction(double gearRatio) {
         this.gearRatio = 1/gearRatio;
         return this;
     }
 
-    public RotationManager Min(double min, double cutoff) {
+    public MotorManager UsingCounts(int counts) {
+        this.mult = 1.0/counts;
+        return this;
+    }
+
+    public MotorManager UsingRevolutions() {
+        this.mult = gearRatio;
+        return this;
+    }
+
+    public MotorManager UsingDegrees() {
+        this.mult = gearRatio/360;
+        return this;
+    }
+
+    public MotorManager UsingRadians() {
+        this.mult = gearRatio/(2*Math.PI);
+        return this;
+    }
+
+    public MotorManager Min(double min, double cutoff) {
         this.min = min * mult;
         this.minCutoff = cutoff * mult;
         this.hasMin = true;
         return this;
     }
 
-    public RotationManager Max(double max,double cutoff) {
+    public MotorManager Max(double max, double cutoff) {
         this.max = max * mult;
         this.maxCutoff = cutoff * mult;
         this.hasMax = true;
         return this;
     }
 
-    public RotationManager Auto(double cutoff) {
+    public MotorManager Auto(double cutoff) {
         this.autoCutoff = cutoff;
         this.hasAuto = true;
         return this;
     }
 
     public void UpdateRotation(double rotation) {
-        this.rotation = rotation * gearRatio * mult;
+        this.rotation = rotation * mult;
     }
 
     public void SetTargetPower(double power) {
