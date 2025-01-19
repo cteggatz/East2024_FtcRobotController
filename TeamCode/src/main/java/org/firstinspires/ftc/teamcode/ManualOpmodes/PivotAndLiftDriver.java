@@ -22,7 +22,7 @@ public class PivotAndLiftDriver extends OpMode{
     private DcMotor rightDrive = null;
     private DcMotor pivotMotor = null; // reference to the motor that controls the lift's pivot
     private DcMotor liftMotor = null; // reference to the motor that controls the lift
-    private Servo pivotServo = null;
+    private Servo armServo = null;
     private Servo gripServo = null;
 
     private boolean override = false;
@@ -30,8 +30,9 @@ public class PivotAndLiftDriver extends OpMode{
     ////////// Movement Constants //////////
     public static final double DRIVE_MOTOR_SPEED_MIN = 0.1;
     public static final double DRIVE_MOTOR_SPEED_MAX = 1.0;
+    public static final double FINE_SPEED = 0.3;
     public static final int DRIVE_MOTOR_SPEED_LEVELS = 4;
-    public static final double BUMPER_DEBOUNCE_TIME  = 10.0; // Minimum number of milliseconds between bumper presses
+    public static final double BUMPER_DEBOUNCE_TIME  = 0.100; // Minimum number of seconds between bumper presses
 
     // The calculated speed difference between each speed level
     public static final double DRIVE_MOTOR_SPEED_DIFF = DRIVE_MOTOR_SPEED_LEVELS == 1 ?  0 : (DRIVE_MOTOR_SPEED_MAX - DRIVE_MOTOR_SPEED_MIN) / (DRIVE_MOTOR_SPEED_LEVELS - 1);
@@ -43,17 +44,25 @@ public class PivotAndLiftDriver extends OpMode{
 
     ////////// PIVOT MOTOR VARIABLES //////////
     private MotorManager pivotManager;
-    public static final double PIVOT_SPEED_MULT = 0.8;
+    public static final double PIVOT_MIN_COUNT = -7000;
+    public static final double PIVOT_MAX_COUNT = 0;
+    public static final double PIVOT_CUTOFF_COUNT = 300;
+    public static final double PIVOT_MAINTAIN_COUNT = 50;
 
     ////////// LIFT MOTOR VARIABLES //////////
     private MotorManager liftManager;
+    public static final double LIFT_MIN_COUNT = -4000;
+    public static final double LIFT_MAX_COUNT = 0;
+    public static final double LIFT_CUTOFF_COUNT = 400;
+    public static final double LIFT_MAINTAIN_COUNT = 20;
+
 
     ////////// GRIPPER MOTOR VARIABLES //////////
-    private double pivotServoOffset  = 0;
-    private double gripServoOffset = 0;
+    private double armPosition = 0;
+    private double gripPosition = 0;
 
-    public static final double MID_SERVO   =  0.5 ;
-    public static final double SERVO_SPEED  = 0.002 ;
+    public static final double ARM_SPEED  = 0.3;
+    public static final double GRIP_SPEED  = 0.8;
 
 
 
@@ -67,27 +76,30 @@ public class PivotAndLiftDriver extends OpMode{
         liftMotor = hardwareMap.get(DcMotor.class, "lift");
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
-        pivotServo = hardwareMap.get(Servo.class, "pivotServo");
+        armServo = hardwareMap.get(Servo.class, "pivotServo");
         gripServo = hardwareMap.get(Servo.class, "gripServo");
         telemetry.addData("Status", "Acquired Electronic References");
 
         // Set the encoder on the pivotMotor to run correctly
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        pivotManager // information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
+        pivotManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
                 .UsingGearReduction((20/125)*(((((1+(46/17))) * (1+(46/17))) * (1+(46/17))) * (1+(46/17)))) // 25:125 gear plus motor gear reduction
-                .UsingCounts(28);
+                .UsingCounts(28)
+                .Min(PIVOT_MIN_COUNT, PIVOT_CUTOFF_COUNT)
+                .Max(PIVOT_MAX_COUNT, PIVOT_CUTOFF_COUNT);
+                //.Maintain(PIVOT_MAINTAIN_COUNT);
         telemetry.addData("Status", "Initialized Pivot Motor");
 
         // Set up lift motor to work correctly
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        liftManager // information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
+        liftManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
                 .UsingGearReduction((((1+(46/11))) * (1+(46/11))))
                 .UsingCounts(28)
-                .Min(-4000, 400)
-                .Max(0, 400)
-                .Auto(50);
+                .Min(LIFT_MIN_COUNT, LIFT_CUTOFF_COUNT)
+                .Max(LIFT_MAX_COUNT, LIFT_CUTOFF_COUNT)
+                .Maintain(LIFT_MAINTAIN_COUNT);
         telemetry.addData("Status", "Initialized Lift Motor");
 
         // Set up left and right drive to work correctly
@@ -98,16 +110,16 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("Status", "Initialized Drive Motors");
 
         // Set up gripper servo
-        pivotServoOffset = pivotServo.getPosition();
-        gripServoOffset = gripServo.getPosition();
-        telemetry.addData("Status", pivotServoOffset);
+        armPosition = armServo.getPosition();
+        gripPosition = gripServo.getPosition();
+        telemetry.addData("Status", armPosition);
 
         telemetry.addData("Status", "Initializing Finished");
     }
 
     @Override
     public void init_loop() {
-        if(gamepad1.dpad_up){
+       /* if(gamepad1.dpad_up){
             liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             liftMotor.setDirection(DcMotor.Direction.FORWARD);
             liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -116,7 +128,7 @@ public class PivotAndLiftDriver extends OpMode{
         if(gamepad1.b){
             liftMotor.setTargetPosition(0);
             telemetry.addData("Status", "Moving to zero");
-        }
+        }*/
     }
 
     @Override
@@ -124,38 +136,38 @@ public class PivotAndLiftDriver extends OpMode{
         // Set the elapsed time to 0.
         runtime.reset();
         deltaTime.reset();
-        pivotServoOffset = pivotServo.getPosition() - MID_SERVO;
-        gripServoOffset = gripServo.getPosition();
+        armPosition = 0.6;//armServo.getPosition()
+        gripPosition = gripServo.getPosition();
 
     }
 
     @Override
     public void loop() {
-        double dt = deltaTime.milliseconds();
+        double dt = deltaTime.seconds();
         deltaTime.reset();
 
         // OVERRODE LOGIC
-        if (gamepad1.dpad_left && gamepad1.b) {
+        if (gamepad1.start && gamepad1.x) {
             pivotMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Pivot", "Reset Motor Encoder");
         }
 
-        if (gamepad1.dpad_left && gamepad1.y) {
+        if (gamepad1.start && gamepad1.b) {
             liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Lift", "Reset Lift");
         }
 
-        if (gamepad1.dpad_right && gamepad1.x) {
+        if (gamepad1.start && gamepad1.y) {
             override = true;
-        } else if (gamepad1.start) {
+        } else if (gamepad1.start && gamepad1.a) {
             override = false;
         }
 
         ////////// PIVOT LOGIC //////////
         pivotManager.UpdateRotation(pivotMotor.getCurrentPosition());
-        pivotManager.SetTargetPower(gamepad1.left_stick_y * PIVOT_SPEED_MULT);
+        pivotManager.SetTargetPower(-improveInput(gamepad1.left_stick_y));
 
         double pivotPosition = pivotManager.GetRotation();
         double pivotPower = pivotManager.GetFinalPower(override);
@@ -164,7 +176,7 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// LIFT LOGIC //////////
         liftManager.UpdateRotation(liftMotor.getCurrentPosition());
-        liftManager.SetTargetPower(gamepad1.left_trigger-gamepad1.right_trigger);
+        liftManager.SetTargetPower(improveInput(gamepad1.left_trigger-gamepad1.right_trigger));
 
         double liftPosition = liftManager.GetRotation();
         double liftPower = liftManager.GetFinalPower(override);
@@ -175,14 +187,18 @@ public class PivotAndLiftDriver extends OpMode{
 
         handleBumperPress(dt, gamepad2.left_bumper, gamepad2.right_bumper);
 
-        double drive = -gamepad2.left_stick_y;
-        double turn  =  gamepad2.right_stick_x;
+        double speedMult = DRIVE_MOTOR_SPEED_MIN + (currentSpeedLevel * DRIVE_MOTOR_SPEED_DIFF);
+        double drive = -improveInput(gamepad2.left_stick_y) * speedMult;
+        double turn  =  improveInput(gamepad2.right_stick_x) * speedMult;
+        if (gamepad1.dpad_up) drive += FINE_SPEED ;
+        if (gamepad1.dpad_down) drive -= FINE_SPEED;
+        if (gamepad1.dpad_right) turn += FINE_SPEED;
+        if (gamepad1.dpad_left) turn -= FINE_SPEED ;
         double leftPower = drive + turn;
         double rightPower = drive - turn;
 
-        double speedMult = DRIVE_MOTOR_SPEED_MIN + (currentSpeedLevel * DRIVE_MOTOR_SPEED_DIFF);
-        leftPower = Range.clip(leftPower, -1.0, 1.0) * speedMult;
-        rightPower = Range.clip(rightPower, -1.0, 1.0) * speedMult;
+        leftPower = Range.clip(leftPower, -1.0, 1.0);
+        rightPower = Range.clip(rightPower, -1.0, 1.0);
 
         leftDrive.setPower(leftPower);
         rightDrive.setPower(rightPower);
@@ -191,20 +207,19 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// GRIPPER CONTROLLERS //////////
         // gripper
-        if(gamepad1.left_bumper){
-            gripServo.setPosition(MID_SERVO + .3);
-        } else if(gamepad1.right_bumper){
-            gripServo.setPosition(MID_SERVO +.5);
-        }
+        if(gamepad1.left_bumper)
+            gripPosition += GRIP_SPEED * dt;
+
+        if(gamepad1.right_bumper)
+            gripPosition -= GRIP_SPEED * dt;
+
+        armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
 
 
-        if(gamepad1.dpad_up){
-            pivotServoOffset += SERVO_SPEED;
-        } else if(gamepad1.dpad_down){
-            pivotServoOffset -= SERVO_SPEED;
-        }
-        pivotServoOffset = Range.clip(pivotServoOffset, -0.5, 0.5);
-        pivotServo.setPosition(MID_SERVO + pivotServoOffset);
+        gripPosition = Range.clip(gripPosition, 0.8, 0.9);
+        armPosition = Range.clip(armPosition, 0.2, 1);
+        gripServo.setPosition(gripPosition);
+        armServo.setPosition(armPosition);
 
         ////////// TELEMETRY OUTPUT //////////
         telemetry.addData("Override: ", override);
@@ -227,16 +242,20 @@ public class PivotAndLiftDriver extends OpMode{
         telemetry.addData("------------", "" );
         // Gripper
         telemetry.addData("Grip Servo Position", "Left: " + gripServo.getPosition());
-        telemetry.addData("Grip Pivot Servo Position", "Right: " + pivotServo.getPosition());
+        telemetry.addData("Grip Pivot Servo Position", "Right: " + armServo.getPosition());
         telemetry.addData("------------", "" );
 
 
     }
 
+    private double improveInput(double value) {
+        return Math.signum(value) * (0.1 + 0.9*(value * value));
+    }
+
 
     /**
      * If either of the bumpers are being pressed, update currentSpeedLevel and handle button press debounce.
-     * @param deltaTime The time since the function was last called, in milliseconds.
+     * @param deltaTime The time since the function was last called, in seconds.
      * @param decrementButtonPressed Whether the button to decrement currentSpeedLevel is being pressed.
      * @param incrementButtonPressed Whether the button to increment currentSpeedLevel is being pressed.
      */

@@ -9,8 +9,8 @@ public class MotorManager {
 
     private double targetPower = 0;
     private double targetRotation = 0;
-    private double autoCutoff = 0;
-    private boolean hasAuto = false;
+    private double maintainCutoff = 0;
+    private boolean hasMaintain = false;
     private boolean hasSetPower = false;
 
     private double min = 0;
@@ -68,9 +68,9 @@ public class MotorManager {
         return this;
     }
 
-    public MotorManager Auto(double cutoff) {
-        this.autoCutoff = cutoff;
-        this.hasAuto = true;
+    public MotorManager Maintain(double cutoff) {
+        this.maintainCutoff = cutoff;
+        this.hasMaintain = true;
         return this;
     }
 
@@ -80,7 +80,7 @@ public class MotorManager {
 
     public void SetTargetPower(double power) {
         this.targetPower = power;
-        this.targetRotation = rotation;
+        if (power != 0) this.targetRotation = rotation;
         this.hasSetPower = true;
     }
 
@@ -95,8 +95,8 @@ public class MotorManager {
             power *= lerp(rotation-min,minCutoff);
         }
 
-        if (power == 0 && hasAuto && hasSetPower) {
-            power = lerp(targetRotation-rotation,autoCutoff);
+        if (power == 0 && hasMaintain && hasSetPower) {
+            power = lerp(targetRotation-rotation, maintainCutoff);
         }
 
         return Range.clip(power, -1, 1);
