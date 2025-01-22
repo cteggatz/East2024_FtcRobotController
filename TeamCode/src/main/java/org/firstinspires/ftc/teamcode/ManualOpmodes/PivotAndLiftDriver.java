@@ -218,7 +218,7 @@ public class PivotAndLiftDriver extends OpMode{
 
 
         gripPosition = Range.clip(gripPosition, 0.8, 0.9);
-        armPosition = Range.clip(armPosition, 0.2, 1);
+        armPosition = Range.clip(armPosition, 0.1, 1);
         gripServo.setPosition(gripPosition);
         armServo.setPosition(armPosition);
 
