@@ -93,6 +93,7 @@ public class PivotAndLiftDriver extends OpMode{
 
         // Set up lift motor to work correctly
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
+        //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
                 .UsingGearReduction((((1+(46/11))) * (1+(46/11))))
@@ -239,6 +240,7 @@ public class PivotAndLiftDriver extends OpMode{
         // Drive
         telemetry.addData("Drive Motors", "Left: " + leftPower);
         telemetry.addData("Drive Motors", "Right: " + rightPower);
+        telemetry.addData("Drive Motors", "Speed: " + speedMult);
         telemetry.addData("------------", "" );
         // Gripper
         telemetry.addData("Grip Servo Position", "Left: " + gripServo.getPosition());
