@@ -169,10 +169,8 @@ public class PivotAndLiftDriver extends OpMode{
         ////////// PIVOT LOGIC //////////
         pivotManager.UpdateRotation(pivotMotor.getCurrentPosition());
         pivotManager.SetTargetPower(-improveInput(gamepad1.left_stick_y));
-
         double pivotPosition = pivotManager.GetRotation();
         double pivotPower = pivotManager.GetFinalPower(override);
-
         pivotMotor.setPower(pivotPower);
 
         ////////// LIFT LOGIC //////////

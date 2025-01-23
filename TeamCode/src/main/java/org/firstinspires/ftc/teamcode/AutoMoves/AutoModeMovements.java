@@ -32,6 +32,16 @@ public abstract class AutoModeMovements {
     public boolean isWorking(){
         return this.isWorking;
     }
+    /**
+     * If you are using a linear op mode, this will just do the entire movement from start to finish with one function call
+     */
+    public void doLinearMove(){
+        onStart();
+        while(!isDone()){
+
+        }
+        onEnd();
+    }
 }
 
 
