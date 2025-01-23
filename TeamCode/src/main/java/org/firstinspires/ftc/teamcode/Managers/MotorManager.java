@@ -20,9 +20,7 @@ public class MotorManager {
     private double maxCutoff;
     private boolean hasMax = false;
 
-    public MotorManager() {
-
-    }
+    public MotorManager() {}
 
     public MotorManager UsingGearIncrease(double gearRatio) {
         this.gearRatio = gearRatio;
@@ -105,6 +103,26 @@ public class MotorManager {
 
     public double GetRotation() {
         return rotation / mult;
+    }
+
+    /**
+     * @return the min count of the manager
+     * @author Christopher Teggatz
+     */
+    public double GetMin(){
+        return this.min;
+    }
+
+    /**
+     * @return the max count of the manager
+     * @author Christopher Teggatz
+     */
+    public double GetMax(){
+        return this.max;
+    }
+
+    public double GetMult(){
+        return this.mult;
     }
 
     private double lerp(double difference, double cutoff) {
