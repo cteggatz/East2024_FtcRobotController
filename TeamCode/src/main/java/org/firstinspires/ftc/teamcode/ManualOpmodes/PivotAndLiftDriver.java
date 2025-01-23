@@ -59,9 +59,11 @@ public class PivotAndLiftDriver extends OpMode{
     ////////// GRIPPER MOTOR VARIABLES //////////
     private double armPosition = 0;
     private double gripPosition = 0;
+    private boolean hasGripMoved = false;
+    private boolean hasArmMoved = false;
 
     public static final double ARM_SPEED  = 0.3;
-    public static final double GRIP_SPEED  = 0.8;
+    public static final double GRIP_SPEED  = 0.5;
 
 
 
@@ -135,8 +137,8 @@ public class PivotAndLiftDriver extends OpMode{
         // Set the elapsed time to 0.
         runtime.reset();
         deltaTime.reset();
-        armPosition = 0.6;//armServo.getPosition()
-        gripPosition = gripServo.getPosition();
+        //armPosition = 0.6;//armServo.getPosition()
+        //gripPosition = gripServo.getPosition();
 
     }
 
@@ -204,18 +206,32 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// GRIPPER CONTROLLERS //////////
         // gripper
+
+        if (!hasArmMoved) {
+            armPosition = armServo.getPosition();
+            if (gamepad1.right_stick_y != 0)
+                hasArmMoved = true;
+        }
+
+        if (!hasGripMoved) {
+            gripPosition = gripServo.getPosition();
+            if (gamepad1.left_bumper || gamepad1.right_bumper)
+                hasGripMoved = true;
+        }
+
         if(gamepad1.left_bumper)
             gripPosition += GRIP_SPEED * dt;
+
 
         if(gamepad1.right_bumper)
             gripPosition -= GRIP_SPEED * dt;
 
-        armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
 
-
-        gripPosition = Range.clip(gripPosition, 0.8, 0.9);
-        armPosition = Range.clip(armPosition, 0.1, 1);
+        gripPosition = Range.clip(gripPosition, 0.83, 0.9);
         gripServo.setPosition(gripPosition);
+
+        armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
+        armPosition = Range.clip(armPosition, 0.1, 1);
         armServo.setPosition(armPosition);
 
         ////////// TELEMETRY OUTPUT //////////

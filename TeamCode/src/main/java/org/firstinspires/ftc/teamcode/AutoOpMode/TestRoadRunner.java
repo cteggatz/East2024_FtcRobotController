@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.drive.NewTankDrive;
 public class TestRoadRunner extends LinearOpMode {
 
     //// DRIVE CONSTANTS ////
-    private static final double turn90 = 90 * 1.6;
+    private static final double angleMult = -1.6*Math.PI/180;
 
     //// PIVOT CONSTANTS ////
     public static final double PIVOT_MIN_COUNT = -7000;
@@ -38,7 +38,7 @@ public class TestRoadRunner extends LinearOpMode {
         // road runner
         NewTankDrive drive = new NewTankDrive(hardwareMap);
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
-                .forward(70)
+                .forward(35)
                 .build();
         Trajectory trajectoryBackwards = drive.trajectoryBuilder(new Pose2d())
                 .back(20)
@@ -71,16 +71,15 @@ public class TestRoadRunner extends LinearOpMode {
 
 
         drive.followTrajectory(trajectoryForward);
-        drive.turn(Math.toRadians(turn90));
-        drive.followTrajectory(trajectoryBackwards);
+        drive.turn(Math.toRadians(90*angleMult));
         //drive.followTrajectory(trajectoryBackward);
 
-        sleep(1000);
+        //sleep(1000);
 
-        MotorManagerMovement top = new MotorManagerMovement(pivotManager, pivotMotor, 1, this);
+        /*MotorManagerMovement top = new MotorManagerMovement(pivotManager, pivotMotor, 1, this);
         for(MotorManagerMovement move: top){
             telemetry.addData("Stuff", "things");
-        }
+        }*/
     }
 
 
