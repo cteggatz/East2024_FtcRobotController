@@ -8,14 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.AutoMoves.MotorManagerMovement;
 import org.firstinspires.ftc.teamcode.Managers.MotorManager;
 import org.firstinspires.ftc.teamcode.drive.NewTankDrive;
 
 @Config
 @Autonomous(group = "autoModes")
-public class TestRoadRunner extends LinearOpMode {
+public class PushBlocksStraigh extends LinearOpMode {
 
     //// DRIVE CONSTANTS ////
     private static final double turn90 = 90 * 1.6;
@@ -38,14 +36,10 @@ public class TestRoadRunner extends LinearOpMode {
 
         // road runner
         NewTankDrive drive = new NewTankDrive(hardwareMap);
-        Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
-                .forward(70)
-                .build();
-        Trajectory trajectoryBackwards = drive.trajectoryBuilder(new Pose2d())
-                .back(20)
-                .build();
 
 
+
+        // our motors
         DcMotor pivotMotor = hardwareMap.get(DcMotor.class, "pivotTest");
         DcMotor liftMotor = hardwareMap.get(DcMotor.class, "lift");
         Servo armServo = hardwareMap.get(Servo.class, "pivotServo");
@@ -65,22 +59,34 @@ public class TestRoadRunner extends LinearOpMode {
 
 
         //MotorManagerMovement bottem = new MotorManagerMovement(pivotManager, pivotMotor, 0, 3, telemetry);
+        Trajectory trajectoryBackwards = drive.trajectoryBuilder(new Pose2d())
+                .back(70)
+                .build();
+        Trajectory trajTurn = drive.trajectoryBuilder(new Pose2d())
+                .back(10)
+                .build();
+
+        Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
+                .forward(50)
+                .build();
+
+
 
         // START OP MODE
         waitForStart();
 
 
-        drive.followTrajectory(trajectoryForward);
-        drive.turn(Math.toRadians(turn90));
+
+        // move to center
         drive.followTrajectory(trajectoryBackwards);
-        //drive.followTrajectory(trajectoryBackward);
 
-        sleep(1000);
+        // turn around the blocks
+        drive.turn(Math.toRadians(turn90));
+        drive.followTrajectory(trajTurn);
+        drive.turn(-Math.toRadians(turn90));
 
-        MotorManagerMovement top = new MotorManagerMovement(pivotManager, pivotMotor, 1, 2, this);
-        for(MotorManagerMovement move: top){
-            telemetry.addData("Stuff", "things");
-        }
+        // move the blocks into the obeservation zone
+        drive.followTrajectory(trajectoryForward);
     }
 
 
