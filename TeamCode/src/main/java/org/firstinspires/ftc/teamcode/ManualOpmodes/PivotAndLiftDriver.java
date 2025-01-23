@@ -45,16 +45,15 @@ public class PivotAndLiftDriver extends OpMode{
     ////////// PIVOT MOTOR VARIABLES //////////
     private MotorManager pivotManager;
     public static final double PIVOT_MIN_COUNT = -7000;
-    public static final double PIVOT_MAX_COUNT = 0;
-    public static final double PIVOT_CUTOFF_COUNT = 300;
-    public static final double PIVOT_MAINTAIN_COUNT = 50;
+    public static final double PIVOT_MAX_COUNT = -20;
+    public static final double PIVOT_EDGE_COUNT = 300;
 
     ////////// LIFT MOTOR VARIABLES //////////
     private MotorManager liftManager;
-    public static final double LIFT_MIN_COUNT = -4000;
-    public static final double LIFT_MAX_COUNT = 0;
-    public static final double LIFT_CUTOFF_COUNT = 400;
-    public static final double LIFT_MAINTAIN_COUNT = 20;
+    public static final double LIFT_MIN_COUNT = -4400;
+    public static final double LIFT_MAX_COUNT = -20;
+    public static final double LIFT_EDGE_COUNT = 300;
+    public static final double LIFT_MAINTAIN_COUNT = 80;
 
 
     ////////// GRIPPER MOTOR VARIABLES //////////
@@ -83,23 +82,22 @@ public class PivotAndLiftDriver extends OpMode{
         // Set the encoder on the pivotMotor to run correctly
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        pivotManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
+        pivotManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
                 .UsingGearReduction((20/125)*(((((1+(46/17))) * (1+(46/17))) * (1+(46/17))) * (1+(46/17)))) // 25:125 gear plus motor gear reduction
-                .UsingCounts(28)
-                .Min(PIVOT_MIN_COUNT, PIVOT_CUTOFF_COUNT)
-                .Max(PIVOT_MAX_COUNT, PIVOT_CUTOFF_COUNT);
-                //.Maintain(PIVOT_MAINTAIN_COUNT);
+                .UsingCounts()
+                .Min(PIVOT_MIN_COUNT, PIVOT_EDGE_COUNT)
+                .Max(PIVOT_MAX_COUNT, PIVOT_EDGE_COUNT);
         telemetry.addData("Status", "Initialized Pivot Motor");
 
         // Set up lift motor to work correctly
         liftMotor.setDirection(DcMotor.Direction.FORWARD);
         //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        liftManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
+        liftManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
                 .UsingGearReduction((((1+(46/11))) * (1+(46/11))))
-                .UsingCounts(28)
-                .Min(LIFT_MIN_COUNT, LIFT_CUTOFF_COUNT)
-                .Max(LIFT_MAX_COUNT, LIFT_CUTOFF_COUNT)
+                .UsingCounts()
+                .Min(LIFT_MIN_COUNT, LIFT_EDGE_COUNT)
+                .Max(LIFT_MAX_COUNT, LIFT_EDGE_COUNT)
                 .Maintain(LIFT_MAINTAIN_COUNT);
         telemetry.addData("Status", "Initialized Lift Motor");
 
@@ -148,21 +146,21 @@ public class PivotAndLiftDriver extends OpMode{
         deltaTime.reset();
 
         // OVERRODE LOGIC
-        if (gamepad1.start && gamepad1.x) {
+        if (gamepad1.back && gamepad1.x) {
             pivotMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             pivotMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Pivot", "Reset Motor Encoder");
         }
 
-        if (gamepad1.start && gamepad1.b) {
+        if (gamepad1.back && gamepad1.b) {
             liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Lift", "Reset Lift");
         }
 
-        if (gamepad1.start && gamepad1.y) {
+        if (gamepad1.back && gamepad1.y) {
             override = true;
-        } else if (gamepad1.start && gamepad1.a) {
+        } else if (gamepad1.back && gamepad1.a) {
             override = false;
         }
 
@@ -175,7 +173,7 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// LIFT LOGIC //////////
         liftManager.UpdateRotation(liftMotor.getCurrentPosition());
-        liftManager.SetTargetPower(improveInput(gamepad1.left_trigger-gamepad1.right_trigger));
+        liftManager.SetTargetPower(improveInput(gamepad1.left_trigger)-improveInput(gamepad1.right_trigger));
 
         double liftPosition = liftManager.GetRotation();
         double liftPower = liftManager.GetFinalPower(override);
@@ -216,7 +214,7 @@ public class PivotAndLiftDriver extends OpMode{
 
 
         gripPosition = Range.clip(gripPosition, 0.8, 0.9);
-        armPosition = Range.clip(armPosition, 0.2, 1);
+        armPosition = Range.clip(armPosition, 0.1, 1);
         gripServo.setPosition(gripPosition);
         armServo.setPosition(armPosition);
 

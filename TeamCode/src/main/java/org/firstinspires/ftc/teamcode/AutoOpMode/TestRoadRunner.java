@@ -22,15 +22,14 @@ public class TestRoadRunner extends LinearOpMode {
 
     //// PIVOT CONSTANTS ////
     public static final double PIVOT_MIN_COUNT = -7000;
-    public static final double PIVOT_MAX_COUNT = 0;
-    public static final double PIVOT_CUTOFF_COUNT = 300;
-    public static final double PIVOT_MAINTAIN_COUNT = 50;
+    public static final double PIVOT_MAX_COUNT = -20;
+    public static final double PIVOT_EDGE_COUNT = 300;
 
     //// LIFT ////
-    public static final double LIFT_MIN_COUNT = -4000;
-    public static final double LIFT_MAX_COUNT = 0;
-    public static final double LIFT_CUTOFF_COUNT = 400;
-    public static final double LIFT_MAINTAIN_COUNT = 20;
+    public static final double LIFT_MIN_COUNT = -4400;
+    public static final double LIFT_MAX_COUNT = -20;
+    public static final double LIFT_EDGE_COUNT = 300;
+    public static final double LIFT_MAINTAIN_COUNT = 80;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -55,11 +54,12 @@ public class TestRoadRunner extends LinearOpMode {
         // INITIALIZE PIVOT MOTOR //
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        MotorManager pivotManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
+        MotorManager pivotManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
                 .UsingGearReduction((20/125)*(((((1+(46/17))) * (1+(46/17))) * (1+(46/17))) * (1+(46/17)))) // 25:125 gear plus motor gear reduction
-                .UsingCounts(28)
-                .Min(PIVOT_MIN_COUNT, PIVOT_CUTOFF_COUNT)
-                .Max(PIVOT_MAX_COUNT, PIVOT_CUTOFF_COUNT);
+                .UsingCounts()
+                .Min(PIVOT_MIN_COUNT, PIVOT_EDGE_COUNT)
+                .Max(PIVOT_MAX_COUNT, PIVOT_EDGE_COUNT)
+                .AutoError(2);
         //.Maintain(PIVOT_MAINTAIN_COUNT);
         telemetry.addData("Status", "Initialized Pivot Motor");
 
@@ -77,7 +77,7 @@ public class TestRoadRunner extends LinearOpMode {
 
         sleep(1000);
 
-        MotorManagerMovement top = new MotorManagerMovement(pivotManager, pivotMotor, 1, 2, this);
+        MotorManagerMovement top = new MotorManagerMovement(pivotManager, pivotMotor, 1, this);
         for(MotorManagerMovement move: top){
             telemetry.addData("Stuff", "things");
         }

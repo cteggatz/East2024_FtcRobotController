@@ -6,12 +6,13 @@ public class MotorManager {
     private double rotation = 0;
     private double gearRatio = 1;
     private double mult = 1;
+    private int counts = 1;
 
     private double targetPower = 0;
     private double targetRotation = 0;
-    private double maintainCutoff = 0;
+    private double targetCutoff = 0;
     private boolean hasMaintain = false;
-    private boolean hasSetPower = false;
+    private boolean hasSetTarget = false;
 
     private double min = 0;
     private double minCutoff;
@@ -20,7 +21,9 @@ public class MotorManager {
     private double maxCutoff;
     private boolean hasMax = false;
 
-    public MotorManager() {}
+    public MotorManager(int counts) {
+        this.counts = counts;
+    }
 
     public MotorManager UsingGearIncrease(double gearRatio) {
         this.gearRatio = gearRatio;
@@ -32,7 +35,7 @@ public class MotorManager {
         return this;
     }
 
-    public MotorManager UsingCounts(int counts) {
+    public MotorManager UsingCounts() {
         this.mult = 1.0/counts;
         return this;
     }
@@ -66,10 +69,20 @@ public class MotorManager {
         return this;
     }
 
-    public MotorManager Maintain(double cutoff) {
-        this.maintainCutoff = cutoff;
+    public MotorManager AutoError(double cutoff) {
+        this.targetCutoff = cutoff * mult;
+        return this;
+    }
+
+    public MotorManager Maintain() {
         this.hasMaintain = true;
         return this;
+    }
+
+    public MotorManager Maintain(double cutoff) {
+        return this
+                .Maintain()
+                .AutoError(cutoff);
     }
 
     public void UpdateRotation(double rotation) {
@@ -78,8 +91,22 @@ public class MotorManager {
 
     public void SetTargetPower(double power) {
         this.targetPower = power;
-        if (power != 0) this.targetRotation = rotation;
-        this.hasSetPower = true;
+        if (hasMaintain && power != 0)
+            SetTargetRotation(GetRotation());
+
+    }
+
+    public void SetTargetRotation(double target) {
+        targetRotation = target * mult;
+        hasSetTarget = true;
+    }
+
+    public void RemoveTargetRotation() {
+        hasSetTarget = false;
+    }
+
+    public boolean IsNearTargetRotation() {
+        return hasSetTarget && Math.abs(targetRotation-rotation) < targetCutoff;
     }
 
     public double GetFinalPower(boolean override) {
@@ -93,8 +120,8 @@ public class MotorManager {
             power *= lerp(rotation-min,minCutoff);
         }
 
-        if (power == 0 && hasMaintain && hasSetPower) {
-            power = lerp(targetRotation-rotation, maintainCutoff);
+        if (power == 0 && hasSetTarget) {
+            power = lerp(targetRotation-rotation, targetCutoff);
         }
 
         return Range.clip(power, -1, 1);
@@ -105,12 +132,20 @@ public class MotorManager {
         return rotation / mult;
     }
 
+    public double GetTargetRotation() {
+        return targetRotation / mult;
+    }
+
+    public double FromProportionalRotation(double proportion) {
+        return (min + (max-min) * proportion) / mult;
+    }
+
     /**
      * @return the min count of the manager
      * @author Christopher Teggatz
      */
     public double GetMin(){
-        return this.min;
+        return this.min / mult;
     }
 
     /**
@@ -118,7 +153,7 @@ public class MotorManager {
      * @author Christopher Teggatz
      */
     public double GetMax(){
-        return this.max;
+        return this.max / mult;
     }
 
     public double GetMult(){
@@ -126,7 +161,7 @@ public class MotorManager {
     }
 
     private double lerp(double difference, double cutoff) {
-        if (Math.abs(difference) >= cutoff) return 1;
+        if (Math.abs(difference) >= cutoff) return Math.signum(difference);
         return difference / cutoff;
     }
 }

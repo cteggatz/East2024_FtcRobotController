@@ -49,9 +49,9 @@ public class PushBlocksStraigh extends LinearOpMode {
         // INITIALIZE PIVOT MOTOR //
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        MotorManager pivotManager = new MotorManager()// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
+        MotorManager pivotManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
                 .UsingGearReduction((20/125)*(((((1+(46/17))) * (1+(46/17))) * (1+(46/17))) * (1+(46/17)))) // 25:125 gear plus motor gear reduction
-                .UsingCounts(28)
+                .UsingCounts()
                 .Min(PIVOT_MIN_COUNT, PIVOT_CUTOFF_COUNT)
                 .Max(PIVOT_MAX_COUNT, PIVOT_CUTOFF_COUNT);
         //.Maintain(PIVOT_MAINTAIN_COUNT);
