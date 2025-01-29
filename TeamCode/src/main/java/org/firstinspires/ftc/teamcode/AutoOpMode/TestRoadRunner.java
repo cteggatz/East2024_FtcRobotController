@@ -38,10 +38,10 @@ public class TestRoadRunner extends LinearOpMode {
         // road runner
         NewTankDrive drive = new NewTankDrive(hardwareMap);
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
-                .forward(70)
+                .forward(60)
                 .build();
         Trajectory trajectoryBackwards = drive.trajectoryBuilder(new Pose2d())
-                .back(20)
+                .forward(20)
                 .build();
 
 
@@ -63,6 +63,17 @@ public class TestRoadRunner extends LinearOpMode {
         //.Maintain(PIVOT_MAINTAIN_COUNT);
         telemetry.addData("Status", "Initialized Pivot Motor");
 
+        // Set up lift motor to work correctly
+        liftMotor.setDirection(DcMotor.Direction.FORWARD);
+        //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        MotorManager liftManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
+                .UsingGearReduction((((1+(46/11))) * (1+(46/11))))
+                .UsingCounts()
+                .Min(LIFT_MIN_COUNT, LIFT_EDGE_COUNT)
+                .Max(LIFT_MAX_COUNT, LIFT_EDGE_COUNT)
+                .Maintain(LIFT_MAINTAIN_COUNT);
+
 
         //MotorManagerMovement bottem = new MotorManagerMovement(pivotManager, pivotMotor, 0, 3, telemetry);
 
@@ -71,16 +82,25 @@ public class TestRoadRunner extends LinearOpMode {
 
 
         drive.followTrajectory(trajectoryForward);
-        drive.turn(Math.toRadians(turn90));
-        drive.followTrajectory(trajectoryBackwards);
+        drive.turn(-Math.toRadians(turn90+5));
         //drive.followTrajectory(trajectoryBackward);
 
-        sleep(1000);
+        // move to the mid point
+        MotorManagerMovement mid = new MotorManagerMovement(pivotManager, pivotMotor, 0.45, this);
+        for(MotorManagerMovement move: mid){
+            telemetry.addData("Stuff", "things");
+            telemetry.update();
+        }
 
-        MotorManagerMovement top = new MotorManagerMovement(pivotManager, pivotMotor, 1, this);
-        for(MotorManagerMovement move: top){
+        MotorManagerMovement extend = new MotorManagerMovement(liftManager, liftMotor, .65, this);
+        for(MotorManagerMovement move: extend){
             telemetry.addData("Stuff", "things");
         }
+
+        drive.followTrajectory(trajectoryBackwards);
+
+        pivotMotor.setTargetPosition(0);
+        sleep(10*1000);
     }
 
 

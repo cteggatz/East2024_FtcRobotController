@@ -173,6 +173,8 @@ public class PivotAndLiftDriver extends OpMode{
 
         ////////// LIFT LOGIC //////////
         liftManager.UpdateRotation(liftMotor.getCurrentPosition());
+
+
         liftManager.SetTargetPower(improveInput(gamepad1.left_trigger)-improveInput(gamepad1.right_trigger));
 
         double liftPosition = liftManager.GetRotation();
@@ -213,7 +215,7 @@ public class PivotAndLiftDriver extends OpMode{
         armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
 
 
-        gripPosition = Range.clip(gripPosition, 0.8, 0.9);
+        gripPosition = Range.clip(gripPosition, 0.76, 0.95);
         armPosition = Range.clip(armPosition, 0.1, 1);
         gripServo.setPosition(gripPosition);
         armServo.setPosition(armPosition);
@@ -228,6 +230,7 @@ public class PivotAndLiftDriver extends OpMode{
         // Lift
         telemetry.addData("Lift", "Power: " + liftPower);
         telemetry.addData("Lift", "Position: " + liftPosition);
+        //telemetry.addData("Pivot", "Rotation: " + liftManager.GetRotation());
         telemetry.addData("------------", "" );
         // Pivot
         telemetry.addData("Pivot", "Power:: " + pivotPower);

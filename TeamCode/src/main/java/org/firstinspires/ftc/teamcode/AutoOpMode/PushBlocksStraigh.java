@@ -59,14 +59,27 @@ public class PushBlocksStraigh extends LinearOpMode {
 
 
         //MotorManagerMovement bottem = new MotorManagerMovement(pivotManager, pivotMotor, 0, 3, telemetry);
-        Trajectory trajectoryBackwards = drive.trajectoryBuilder(new Pose2d())
-                .back(70)
+
+        //MotorManagerMovement bottem = new MotorManagerMovement(pivotManager, pivotMotor, 0, 3, telemetry);
+        Trajectory moveToBlocks = drive.trajectoryBuilder(new Pose2d())
+                .forward(50)
                 .build();
-        Trajectory trajTurn = drive.trajectoryBuilder(new Pose2d())
-                .back(10)
+        Trajectory pushBlocks = drive.trajectoryBuilder(new Pose2d())
+                .forward(7)
                 .build();
 
-        Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
+        Trajectory moveBackwards = drive.trajectoryBuilder(new Pose2d())
+                .back(44)
+                .build();
+        Trajectory moveForwards = drive.trajectoryBuilder(new Pose2d())
+                .forward(25)
+                .build();
+
+        Trajectory inchBackwards = drive.trajectoryBuilder(new Pose2d())
+                .back(4)
+                .build();
+
+        Trajectory pushBlocksToSpawn = drive.trajectoryBuilder(new Pose2d())
                 .forward(50)
                 .build();
 
@@ -77,16 +90,20 @@ public class PushBlocksStraigh extends LinearOpMode {
 
 
 
-        // move to center
-        drive.followTrajectory(trajectoryBackwards);
+        // move in front of the blocks
+        drive.followTrajectory(moveToBlocks);
 
-        // turn around the blocks
-        drive.turn(Math.toRadians(turn90));
-        drive.followTrajectory(trajTurn);
+        // push the blocks together
         drive.turn(-Math.toRadians(turn90));
+        drive.followTrajectory(pushBlocks);
 
-        // move the blocks into the obeservation zone
-        drive.followTrajectory(trajectoryForward);
+        drive.turn(-Math.toRadians(turn90+15));
+        drive.followTrajectory(pushBlocksToSpawn);
+
+        drive.followTrajectory(moveBackwards);
+        drive.turn(Math.toRadians(45*1.6));
+        drive.followTrajectory(pushBlocksToSpawn);
+
     }
 
 
