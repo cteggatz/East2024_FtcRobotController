@@ -6,7 +6,7 @@ public class MotorManager {
     private double rotation = 0;
     private double gearRatio = 1;
     private double mult = 1;
-    private int counts = 1;
+    private int counts;
 
     private double targetPower = 0;
     private double targetRotation = 0;
@@ -20,7 +20,6 @@ public class MotorManager {
     private double max = 0;
     private double maxCutoff;
     private boolean hasMax = false;
-
     public MotorManager(int counts) {
         this.counts = counts;
     }

@@ -87,7 +87,7 @@ public class PivotAndLiftDriver extends OpMode{
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         pivotManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
-                .UsingGearIncrease(1062)// manually tuned instead of calculated (25.0/125.0)*(((((1+(46.0/17.0))) * (1+(46.0/17.0))) * (1+(46.0/17.0))) * (1+(46.0/17.0)))) // 25:125 gear plus motor gear reduction
+                .UsingGearIncrease(1062)// manually tuned instead of calculated
                 .UsingCounts()
                 .Min(PIVOT_MIN_COUNT, PIVOT_EDGE_COUNT)
                 .Max(PIVOT_MAX_COUNT, PIVOT_EDGE_COUNT);
@@ -98,7 +98,6 @@ public class PivotAndLiftDriver extends OpMode{
         //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
-                .UsingGearIncrease((((1+(46.0/11.0))) * (1+(46.0/11.0))))
                 .UsingCounts()
                 .Min(LIFT_MIN_COUNT, LIFT_EDGE_COUNT)
                 .Max(LIFT_MAX_COUNT, LIFT_EDGE_COUNT)
