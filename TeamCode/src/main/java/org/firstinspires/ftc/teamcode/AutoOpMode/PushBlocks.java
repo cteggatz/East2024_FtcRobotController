@@ -51,7 +51,7 @@ public class PushBlocks extends LinearOpMode {
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         MotorManager pivotManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
-                .UsingGearReduction((20/125)*(((((1+(46/17))) * (1+(46/17))) * (1+(46/17))) * (1+(46/17)))) // 25:125 gear plus motor gear reduction
+                .UsingGearIncrease(1062)// manually tuned instead of calculated
                 .UsingCounts()
                 .Min(PIVOT_MIN_COUNT, PIVOT_CUTOFF_COUNT)
                 .Max(PIVOT_MAX_COUNT, PIVOT_CUTOFF_COUNT);

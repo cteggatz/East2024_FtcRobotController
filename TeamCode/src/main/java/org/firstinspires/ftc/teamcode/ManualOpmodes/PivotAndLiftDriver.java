@@ -25,8 +25,6 @@ public class PivotAndLiftDriver extends OpMode{
     private Servo armServo = null;
     private Servo gripServo = null;
 
-    private boolean override = false;
-
     ////////// Movement Constants //////////
     public static final double DRIVE_MOTOR_SPEED_MIN = 0.1;
     public static final double DRIVE_MOTOR_SPEED_MAX = 1.0;
@@ -65,7 +63,7 @@ public class PivotAndLiftDriver extends OpMode{
     private boolean hasArmMoved = false;
 
     public static final double ARM_SPEED  = 0.3;
-    public static final double GRIP_SPEED  = 0.5;
+    public static final double GRIP_SPEED  = 1;
 
 
 
@@ -162,17 +160,22 @@ public class PivotAndLiftDriver extends OpMode{
         }
 
         if (gamepad1.back && gamepad1.y) {
-            override = true;
+            pivotManager.EnableOverride();
+            liftManager.EnableOverride();
         } else if (gamepad1.back && gamepad1.a) {
-            override = false;
+            pivotManager.DisableOverride();
+            liftManager.DisableOverride();
         }
 
         ////////// PIVOT LOGIC //////////
         pivotManager.UpdateRotation(pivotMotor.getCurrentPosition());
         pivotManager.SetTargetPower(-improveInput(gamepad1.left_stick_y));
         double pivotPosition = pivotManager.GetRotation();
-        double pivotPower = pivotManager.GetFinalPower(override);
+        double pivotPower = pivotManager.GetFinalPower();
         pivotMotor.setPower(pivotPower);
+
+        double pivotPositionDegrees = pivotManager.UsingDegrees().GetRotation();
+        pivotManager.UsingCounts();
 
         ////////// LIFT LOGIC //////////
         liftManager.UpdateRotation(liftMotor.getCurrentPosition());
@@ -183,7 +186,7 @@ public class PivotAndLiftDriver extends OpMode{
         regulateLiftMin();
 
         double liftPosition = liftManager.GetRotation();
-        double liftPower = liftManager.GetFinalPower(override);
+        double liftPower = liftManager.GetFinalPower();
 
         liftMotor.setPower(liftPower);
 
@@ -232,7 +235,7 @@ public class PivotAndLiftDriver extends OpMode{
             gripPosition -= GRIP_SPEED * dt;
 
 
-        gripPosition = Range.clip(gripPosition, 0.83, 0.9);
+        gripPosition = Range.clip(gripPosition, 0.8, 0.9);
         gripServo.setPosition(gripPosition);
 
         armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
@@ -240,20 +243,21 @@ public class PivotAndLiftDriver extends OpMode{
         armServo.setPosition(armPosition);
 
         ////////// TELEMETRY OUTPUT //////////
-        telemetry.addData("Override: ", override);
         telemetry.addData("------------", "" );
         // Run Time
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Delta Time: " + deltaTime.toString());
         telemetry.addData("------------", "" );
         // Lift
+        telemetry.addData("Lift: ", "Override:" + liftManager.IsOverrideEnabled());
         telemetry.addData("Lift", "Power: " + liftPower);
         telemetry.addData("Lift", "Position: " + liftPosition);
-        //telemetry.addData("Pivot", "Rotation: " + liftManager.GetRotation());
         telemetry.addData("------------", "" );
         // Pivot
-        telemetry.addData("Pivot", "Power:: " + pivotPower);
+        telemetry.addData("Pivot: ", "Override:" + pivotManager.IsOverrideEnabled());
+        telemetry.addData("Pivot", "Power: " + pivotPower);
         telemetry.addData("Pivot", "Position: " + pivotPosition);
+        telemetry.addData("Pivot", "Position (Degrees): " + pivotPositionDegrees);
         telemetry.addData("------------", "" );
         // Drive
         telemetry.addData("Drive Motors", "Left: " + leftPower);

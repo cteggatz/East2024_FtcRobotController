@@ -71,7 +71,7 @@ public class MotorManagerMovement extends AutoModeMovements implements Iterable<
         manager.SetTargetRotation(targetRotation);
         //manager.SetTargetPower(-1);
 
-        double power = manager.GetFinalPower(false);
+        double power = manager.GetFinalPower();
         motor.setPower(power);
 
         telemetry.addData("MotorManagerMovement", "TargetRotation: " + manager.GetTargetRotation());
@@ -89,7 +89,7 @@ public class MotorManagerMovement extends AutoModeMovements implements Iterable<
     public void onEnd() {
         motor.setPower(0);
         manager.SetTargetPower(0);
-        manager.RemoveTargetRotation();
+        manager.ResetTargetRotation();
     }
 
     @Override
