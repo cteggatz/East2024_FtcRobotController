@@ -19,6 +19,7 @@ public class TestRoadRunner extends LinearOpMode {
 
     //// DRIVE CONSTANTS ////
     private static final double turn90 = 90 * 1.6;
+    private static final double angleMult = -1.6*Math.PI/180;
 
     //// PIVOT CONSTANTS ////
     public static final double PIVOT_MIN_COUNT = -7000;
@@ -55,7 +56,7 @@ public class TestRoadRunner extends LinearOpMode {
         pivotMotor.setDirection(DcMotor.Direction.FORWARD);
         pivotMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         MotorManager pivotManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/
-                .UsingGearReduction((20/125)*(((((1+(46/17))) * (1+(46/17))) * (1+(46/17))) * (1+(46/17)))) // 25:125 gear plus motor gear reduction
+                .UsingGearIncrease(1062)// manually tuned instead of calculated
                 .UsingCounts()
                 .Min(PIVOT_MIN_COUNT, PIVOT_EDGE_COUNT)
                 .Max(PIVOT_MAX_COUNT, PIVOT_EDGE_COUNT)
@@ -102,6 +103,4 @@ public class TestRoadRunner extends LinearOpMode {
         pivotMotor.setTargetPosition(0);
         sleep(10*1000);
     }
-
-
 }

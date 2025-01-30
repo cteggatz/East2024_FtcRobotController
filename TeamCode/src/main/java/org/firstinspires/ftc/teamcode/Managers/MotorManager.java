@@ -6,7 +6,7 @@ public class MotorManager {
     private double rotation = 0;
     private double gearRatio = 1;
     private double mult = 1;
-    private int counts = 1;
+    private int counts;
 
     private double targetPower = 0;
     private double targetRotation = 0;
@@ -20,7 +20,6 @@ public class MotorManager {
     private double max = 0;
     private double maxCutoff;
     private boolean hasMax = false;
-
     public MotorManager(int counts) {
         this.counts = counts;
     }
@@ -55,18 +54,26 @@ public class MotorManager {
         return this;
     }
 
-    public MotorManager Min(double min, double cutoff) {
+    public MotorManager Min(double min) {
         this.min = min * mult;
-        this.minCutoff = cutoff * mult;
         this.hasMin = true;
         return this;
     }
 
-    public MotorManager Max(double max, double cutoff) {
+    public MotorManager Min(double min, double cutoff) {
+        this.minCutoff = cutoff * mult;
+        return Min(min);
+    }
+
+    public MotorManager Max(double max) {
         this.max = max * mult;
-        this.maxCutoff = cutoff * mult;
         this.hasMax = true;
         return this;
+    }
+
+    public MotorManager Max(double max, double cutoff) {
+        this.maxCutoff = cutoff * mult;
+        return Max(max);
     }
 
     public MotorManager AutoError(double cutoff) {
@@ -83,6 +90,21 @@ public class MotorManager {
         return this
                 .Maintain()
                 .AutoError(cutoff);
+    }
+
+    public MotorManager DisableMin() {
+        this.hasMin = false;
+        return this;
+    }
+
+    public MotorManager DisableMax() {
+        this.hasMax = false;
+        return this;
+    }
+
+    public MotorManager DisableMaintain() {
+        this.hasMaintain = false;
+        return this;
     }
 
     public void UpdateRotation(double rotation) {
@@ -112,20 +134,16 @@ public class MotorManager {
     public double GetFinalPower(boolean override) {
         double power = targetPower;
 
-        if (power > 0 && hasMax && !override) {
-            power *= lerp(max-rotation,maxCutoff);
-        }
+        if (power == 0 && hasSetTarget)
+            power = soften(targetRotation-rotation, targetCutoff);
 
-        if (power < 0 && hasMin && !override) {
-            power *= lerp(rotation-min,minCutoff);
-        }
+        if (power > 0 && hasMax && !override)
+            power *= soften(max-rotation,maxCutoff);
 
-        if (power == 0 && hasSetTarget) {
-            power = lerp(targetRotation-rotation, targetCutoff);
-        }
+        if (power < 0 && hasMin && !override)
+            power *= soften(rotation-min,minCutoff);
 
         return Range.clip(power, -1, 1);
-
     }
 
     public double GetRotation() {
@@ -137,6 +155,7 @@ public class MotorManager {
     }
 
     public double FromProportionalRotation(double proportion) {
+        if (!hasMin || !hasMax) throw new IllegalStateException("Minimum and Maximum must be defined.");
         return (min + (max-min) * proportion) / mult;
     }
 
@@ -160,7 +179,7 @@ public class MotorManager {
         return this.mult;
     }
 
-    private double lerp(double difference, double cutoff) {
+    private double soften(double difference, double cutoff) {
         if (Math.abs(difference) >= cutoff) return Math.signum(difference);
         return difference / cutoff;
     }
