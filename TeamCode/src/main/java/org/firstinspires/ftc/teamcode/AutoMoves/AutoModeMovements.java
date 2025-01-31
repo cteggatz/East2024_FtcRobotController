@@ -38,7 +38,7 @@ public abstract class AutoModeMovements {
     public void doLinearMove(){
         onStart();
         while(!isDone()){
-
+            doMovement();
         }
         onEnd();
     }

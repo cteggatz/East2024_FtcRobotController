@@ -94,7 +94,9 @@ public class PushBlocksStraigh extends LinearOpMode {
         drive.followTrajectory(moveToBlocks);
 
         // push the blocks together
-        drive.turn(-Math.toRadians(165*1.2));
+        drive.turn(-Math.toRadians(turn90));
+        drive.followTrajectory(pushBlocks);
+        drive.turn(-Math.toRadians(85*1.6));
         drive.followTrajectory(pushBlocksToSpawn);
 
         //drive.turn(-Math.toRadians(turn90));
