@@ -69,7 +69,6 @@ public class TestRoadRunner extends LinearOpMode {
         //liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         MotorManager liftManager = new MotorManager(28)// information from https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/
-                .UsingGearReduction((((1+(46/11))) * (1+(46/11))))
                 .UsingCounts()
                 .Min(LIFT_MIN_COUNT, LIFT_EDGE_COUNT)
                 .Max(LIFT_MAX_COUNT, LIFT_EDGE_COUNT)

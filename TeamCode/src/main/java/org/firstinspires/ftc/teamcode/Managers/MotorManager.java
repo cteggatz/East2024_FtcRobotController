@@ -7,6 +7,7 @@ public class MotorManager {
     private double gearRatio = 1;
     private double mult = 1;
     private int counts;
+    private boolean override;
 
     private double targetPower = 0;
     private double targetRotation = 0;
@@ -31,6 +32,11 @@ public class MotorManager {
 
     public MotorManager UsingGearReduction(double gearRatio) {
         this.gearRatio = 1/gearRatio;
+        return this;
+    }
+
+    public MotorManager UsingRawRevolutions() {
+        this.mult = 1.0;
         return this;
     }
 
@@ -107,6 +113,15 @@ public class MotorManager {
         return this;
     }
 
+    public void EnableOverride() {
+        this.override = true;
+        ResetTargetRotation();
+    }
+
+    public void DisableOverride() {
+        this.override = false;
+    }
+
     public void UpdateRotation(double rotation) {
         this.rotation = rotation * mult;
     }
@@ -123,7 +138,8 @@ public class MotorManager {
         hasSetTarget = true;
     }
 
-    public void RemoveTargetRotation() {
+    public void ResetTargetRotation() {
+        targetRotation = rotation;
         hasSetTarget = false;
     }
 
@@ -131,7 +147,7 @@ public class MotorManager {
         return hasSetTarget && Math.abs(targetRotation-rotation) < targetCutoff;
     }
 
-    public double GetFinalPower(boolean override) {
+    public double GetFinalPower() {
         double power = targetPower;
 
         if (power == 0 && hasSetTarget)
@@ -159,6 +175,14 @@ public class MotorManager {
         return (min + (max-min) * proportion) / mult;
     }
 
+    public boolean HasTargetRotation() {
+        return hasSetTarget;
+    }
+
+    public boolean IsOverrideEnabled() {
+        return override;
+    }
+
     /**
      * @return the min count of the manager
      * @author Christopher Teggatz
@@ -173,10 +197,6 @@ public class MotorManager {
      */
     public double GetMax(){
         return this.max / mult;
-    }
-
-    public double GetMult(){
-        return this.mult;
     }
 
     private double soften(double difference, double cutoff) {
