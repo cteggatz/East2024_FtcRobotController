@@ -63,7 +63,7 @@ public class PivotAndLiftDriver extends OpMode{
     private boolean hasArmMoved = false;
 
     public static final double ARM_SPEED  = 0.3;
-    public static final double GRIP_SPEED  = 1;
+    public static final double GRIP_SPEED  = .6;
 
 
 
@@ -235,7 +235,7 @@ public class PivotAndLiftDriver extends OpMode{
             gripPosition -= GRIP_SPEED * dt;
 
 
-        gripPosition = Range.clip(gripPosition, 0.8, 0.9);
+        gripPosition = Range.clip(gripPosition, 0.78, 0.92);
         gripServo.setPosition(gripPosition);
 
         armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
