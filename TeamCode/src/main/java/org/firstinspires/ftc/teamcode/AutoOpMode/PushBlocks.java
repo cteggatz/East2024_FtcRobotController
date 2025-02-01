@@ -3,21 +3,18 @@ package org.firstinspires.ftc.teamcode.AutoOpMode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.AutoMoves.MotorManagerMovement;
 import org.firstinspires.ftc.teamcode.Managers.MotorManager;
 import org.firstinspires.ftc.teamcode.drive.NewTankDrive;
 
 @Config
 @Autonomous(group = "autoModes")
 public class PushBlocks extends LinearOpMode {
-
-    //// DRIVE CONSTANTS ////
-    private static final double turn90 = 90 * 1.6;
 
     //// PIVOT CONSTANTS ////
     public static final double PIVOT_MIN_COUNT = -7000;
@@ -38,8 +35,6 @@ public class PushBlocks extends LinearOpMode {
         // road runner
         NewTankDrive drive = new NewTankDrive(hardwareMap);
 
-
-
         // our motors
         DcMotor pivotMotor = hardwareMap.get(DcMotor.class, "pivotTest");
         DcMotor liftMotor = hardwareMap.get(DcMotor.class, "lift");
@@ -58,61 +53,23 @@ public class PushBlocks extends LinearOpMode {
         //.Maintain(PIVOT_MAINTAIN_COUNT);
         telemetry.addData("Status", "Initialized Pivot Motor");
 
-
-        //MotorManagerMovement bottem = new MotorManagerMovement(pivotManager, pivotMotor, 0, 3, telemetry);
-        Trajectory moveToBlocks = drive.trajectoryBuilder(new Pose2d())
-                .back(35)
-                .build();
-        Trajectory pushBlocks = drive.trajectoryBuilder(new Pose2d())
-                .forward(25)
-                .build();
-
-        Trajectory moveBackwards = drive.trajectoryBuilder(new Pose2d())
-                .back(20)
-                .build();
-        Trajectory moveForwards = drive.trajectoryBuilder(new Pose2d())
-                .forward(25)
-                .build();
-
-        Trajectory inchBackwards = drive.trajectoryBuilder(new Pose2d())
-                .back(4)
-                .build();
-
-        Trajectory pushBlocksToSpawn = drive.trajectoryBuilder(new Pose2d())
-                .forward(60)
-                .build();
-
-
-
         // START OP MODE
         waitForStart();
 
-
-
-        // move in front of the blocks
-        drive.followTrajectory(moveToBlocks);
-
-        // push the blocks together
-        drive.turn(Math.toRadians(turn90));
-        drive.followTrajectory(pushBlocks);
-
-        // reposition for the push
-        drive.followTrajectory(moveBackwards);
-        drive.turn(Math.toRadians(turn90+5));
-
-        // reposition for the push
-        drive.followTrajectory(moveForwards);
-        drive.turn(-Math.toRadians(turn90));
-
-        // ram against wall
-        drive.followTrajectory(moveForwards);
-        drive.followTrajectory(inchBackwards);
-        drive.turn(-Math.toRadians(turn90));
-
-        // move back to spawn
-        drive.followTrajectory(pushBlocksToSpawn);
-
+        moveStraight(drive,50);
+        drive.turn(-Math.toRadians(90 * 1.4));
+        moveStraight(drive,7);
+        drive.turn(-Math.toRadians(90 * 1.4));
+        moveStraight(drive,35);
+        moveStraight(drive,-45);
+        drive.turn(-Math.toRadians(-15*3));
+        moveStraight(drive,60);
     }
 
-
+    private void moveStraight(NewTankDrive drive, double distance) {
+        TrajectoryBuilder trajectory = drive.trajectoryBuilder(new Pose2d());
+        if (distance > 0) trajectory.forward(distance);
+        else if (distance < 0) trajectory.back(-distance);
+        drive.followTrajectory(trajectory.build());
+    }
 }

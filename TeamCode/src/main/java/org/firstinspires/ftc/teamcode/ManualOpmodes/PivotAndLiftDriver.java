@@ -17,6 +17,8 @@ public class PivotAndLiftDriver extends OpMode{
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime deltaTime = new ElapsedTime();
 
+    private boolean hasZeroed = false;
+
     ////////// ELECTRONICS REFERENCES //////////
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -167,6 +169,14 @@ public class PivotAndLiftDriver extends OpMode{
             liftManager.DisableOverride();
         }
 
+        if (gamepad1.back && gamepad1.start) {
+            pivotManager.SetTargetRotation(0);
+            liftManager.SetTargetRotation(0);
+        }
+
+        if (gamepad1.left_stick_y != 0) pivotManager.ResetTargetRotation();
+        if (gamepad1.left_trigger != 0 || gamepad1.right_trigger != 0) liftManager.ResetTargetRotation();
+
         ////////// PIVOT LOGIC //////////
         pivotManager.UpdateRotation(pivotMotor.getCurrentPosition());
         pivotManager.SetTargetPower(-improveInput(gamepad1.left_stick_y));
@@ -239,7 +249,7 @@ public class PivotAndLiftDriver extends OpMode{
         gripServo.setPosition(gripPosition);
 
         armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
-        armPosition = Range.clip(armPosition, 0.1, 1);
+        armPosition = Range.clip(armPosition, 0.12, 1);
         armServo.setPosition(armPosition);
 
         ////////// TELEMETRY OUTPUT //////////

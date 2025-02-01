@@ -8,14 +8,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.AutoMoves.MotorManagerMovement;
 import org.firstinspires.ftc.teamcode.Managers.MotorManager;
 import org.firstinspires.ftc.teamcode.drive.NewTankDrive;
 
 @Config
 @Autonomous(group = "autoModes")
-public class TestRoadRunner extends LinearOpMode {
+public class TouchBar extends LinearOpMode {
 
     //// DRIVE CONSTANTS ////
     private static final double turn90 = 90 * 1.6;
