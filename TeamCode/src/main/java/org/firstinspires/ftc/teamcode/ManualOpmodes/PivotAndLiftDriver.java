@@ -17,8 +17,6 @@ public class PivotAndLiftDriver extends OpMode{
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime deltaTime = new ElapsedTime();
 
-    private boolean hasZeroed = false;
-
     ////////// ELECTRONICS REFERENCES //////////
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -47,6 +45,7 @@ public class PivotAndLiftDriver extends OpMode{
     public static final double PIVOT_MIN_COUNT = -7000;
     public static final double PIVOT_MAX_COUNT = -20;
     public static final double PIVOT_EDGE_COUNT = 300;
+    public static final double PIVOT_ERROR_COUNT = 40;
 
     ////////// LIFT MOTOR VARIABLES //////////
     private MotorManager liftManager;
@@ -65,7 +64,7 @@ public class PivotAndLiftDriver extends OpMode{
     private boolean hasArmMoved = false;
 
     public static final double ARM_SPEED  = 0.3;
-    public static final double GRIP_SPEED  = .6;
+    public static final double GRIP_SPEED  = 0.4;
 
 
 
@@ -90,7 +89,8 @@ public class PivotAndLiftDriver extends OpMode{
                 .UsingGearIncrease(1062)// manually tuned instead of calculated
                 .UsingCounts()
                 .Min(PIVOT_MIN_COUNT, PIVOT_EDGE_COUNT)
-                .Max(PIVOT_MAX_COUNT, PIVOT_EDGE_COUNT);
+                .Max(PIVOT_MAX_COUNT, PIVOT_EDGE_COUNT)
+                .AutoError(PIVOT_ERROR_COUNT);
         telemetry.addData("Status", "Initialized Pivot Motor");
 
         // Set up lift motor to work correctly
@@ -245,7 +245,7 @@ public class PivotAndLiftDriver extends OpMode{
             gripPosition -= GRIP_SPEED * dt;
 
 
-        gripPosition = Range.clip(gripPosition, 0.78, 0.92);
+        gripPosition = Range.clip(gripPosition, 0.79, 0.93);
         gripServo.setPosition(gripPosition);
 
         armPosition += -improveInput(gamepad1.right_stick_y) * ARM_SPEED * dt;
