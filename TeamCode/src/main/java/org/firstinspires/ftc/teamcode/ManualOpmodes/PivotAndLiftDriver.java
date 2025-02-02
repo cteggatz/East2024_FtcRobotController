@@ -43,16 +43,16 @@ public class PivotAndLiftDriver extends OpMode{
     ////////// PIVOT MOTOR VARIABLES //////////
     private MotorManager pivotManager;
     public static final double PIVOT_MIN_COUNT = -7000;
-    public static final double PIVOT_MAX_COUNT = -20;
-    public static final double PIVOT_EDGE_COUNT = 300;
-    public static final double PIVOT_ERROR_COUNT = 40;
+    public static final double PIVOT_MAX_COUNT = 50;
+    public static final double PIVOT_EDGE_COUNT = 100;
+    public static final double PIVOT_ERROR_COUNT = 80;
 
     ////////// LIFT MOTOR VARIABLES //////////
     private MotorManager liftManager;
     public static final double LIFT_MIN_COUNT = -4400;
     public static final double LIFT_MIN_COUNT_LOW = -3100;
     public static final double LIFT_MIN_LOW_PROPORTION = LIFT_MIN_COUNT_LOW/LIFT_MIN_COUNT;
-    public static final double LIFT_MAX_COUNT = -20;
+    public static final double LIFT_MAX_COUNT = 10;
     public static final double LIFT_EDGE_COUNT = 300;
     public static final double LIFT_MAINTAIN_COUNT = 80;
 
